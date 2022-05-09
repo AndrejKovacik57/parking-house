@@ -5,6 +5,14 @@
     <persistence-unit name="default" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <!-- TODO Domain Classes -->
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.CAR_PARK</class>
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.CAR_PARK_FLOOR</class>
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.CAR_PARK_FLOOR_ID</class>
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.PARKING_SPOT</class>
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.CAR</class>
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.USER</class>
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.RESERVATION</class>
+        <class>sk.stuba.fei.uim.vsa.pr2.domain.CAR_TYPE</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
@@ -12,7 +20,7 @@
             <property name="javax.persistence.jdbc.user" value="vsa"/>
             <property name="javax.persistence.jdbc.password" value="vsa"/>
 
-            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+            <property name="javax.persistence.schema-generation.database.action" value="create"/>
             <property name="eclipselink.target-database" value="MySQL"/>
             <property name="eclipselink.logging.level.sql" value="FINE"/>
             <property name="eclipselink.logging.parameters" value="true"/>

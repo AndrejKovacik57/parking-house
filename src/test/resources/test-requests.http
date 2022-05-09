@@ -1,1 +1,150 @@
+###
+GET http://localhost:8080/carparks
+Accept: application/json
 
+###
+GET http://localhost:8080/carparks/4
+Accept: application/json
+
+###
+POST http://localhost:8080/carparks
+Accept: application/json
+
+{
+    "name": "FULL CARPARK",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" :
+    [
+        {
+            "identifier": "F1",
+            "spots" :
+            [
+                {
+                "identifier": "S1",
+                "carParkFloor": "F1",
+                "type" :
+                    {
+                        "name": "elektrika"
+                    }
+                },
+                {
+                "identifier": "S2",
+                "type" :
+                    {
+                        "name": "plyn"
+                    },
+                "carParkFloor": "F1"
+                }
+            ]
+        }
+    ]
+}
+###
+POST http://localhost:8080/skusam
+Accept: application/json
+
+{
+    "name": "FULL CARPARK10",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" :
+    [
+        {
+            "identifier": "F1"
+        }
+    ]
+
+}
+###
+POST http://localhost:8080/carparks
+Accept: application/json
+
+{
+    "name": "FULL CARPARK10",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" :
+    [
+        {
+            "identifier": "F1"
+        }
+    ]
+
+}
+###
+
+PUT http://localhost:8080/carparks
+Accept: application/json
+
+{
+    "name": "FULL CARPARK UPDATED",
+    "address": "balbal 58 updated",
+    "prices": 99
+}
+###
+DELETE http://localhost:8080/carparks/952
+Accept: application/json
+
+###
+GET http://localhost:8080/carparks/401/floors
+Accept: application/json
+###
+POST http://localhost:8080/carparks/4/floors
+Accept: application/json
+
+{
+    "identifier": "F1",
+    "spots" :
+    [
+        {
+            "identifier": "S1",
+            "carParkFloor": "F1",
+            "type" :
+                {
+                    "name": "elektrika"
+                }
+         }
+    ]
+}
+
+###
+DELETE http://localhost:8080/carparks/4/floors/F1
+Accept: application/json
+
+###
+GET http://localhost:8080/carparks/1/spots
+Accept: application/json
+
+###
+GET http://localhost:8080/carparks/1/spots?free=false
+Accept: application/json
+
+###
+GET http://localhost:8080/carparks/401/floors/F1/spots
+Accept: application/json
+
+###
+GET http://localhost:8080/parkingspots/403
+Accept: application/json
+
+###
+POST http://localhost:8080/carparks/1/floors/Ff1/spots
+Accept: application/json
+
+{
+    "identifier": "S2",
+    "carParkFloor": "F1",
+    "type" :
+        {
+            "name": "future"
+        }
+}
+
+###
+GET http://localhost:8080/users
+Accept: application/json
+
+###
+GET http://localhost:8080/users?email=d
+Accept: application/json

@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import sk.stuba.fei.uim.vsa.pr2.service.CarParkService;
 
 import java.net.URI;
 import java.util.logging.Level;
@@ -17,8 +18,7 @@ public class Project2 {
     public static final Logger LOGGER = Logger.getLogger(Project2.class.getName());
     public static final String BASE_URI = "http://localhost/";
     public static final int PORT = 8080;
-    public static final Class<? extends Application> APPLICATION_CLASS = null; // TODO sem dosaď vlastnú triedu
-
+    public static final Class<? extends Application> APPLICATION_CLASS = Project2Application.class;// TODO sem dosaď vlastnú triedu
     public static void main(String[] args) {
         try {
             final HttpServer server = startServer();
@@ -49,6 +49,12 @@ public class Project2 {
     }
 
     public static void postStart() {
+        CarParkService carParkService = new CarParkService();
+
+        Object user = carParkService.getUser("admin@vsa.sk");
+        if (user == null){
+            carParkService.createUser("vsa","vsa","admin@vsa.sk");
+        }
         // TODO sem napíš akékoľvek nastavenia, či volania, ktoré sa majú udiať ihneď po štarte
     }
 
