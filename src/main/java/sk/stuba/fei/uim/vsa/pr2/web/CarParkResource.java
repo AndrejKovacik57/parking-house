@@ -16,6 +16,7 @@ import sk.stuba.fei.uim.vsa.pr2.web.demand.CarParkFloorDemand;
 import sk.stuba.fei.uim.vsa.pr2.web.demand.ParkingSpotDemand;
 import sk.stuba.fei.uim.vsa.pr2.web.response.*;
 import java.util.*;
+import java.util.regex.PatternSyntaxException;
 
 
 @Path("/")
@@ -26,8 +27,16 @@ public class CarParkResource {
     private USER getUserAuth (String authHEad){
         String base64Encoded = authHEad.substring("Basic ".length());
         String decoded = new String(Base64.getDecoder().decode(base64Encoded));
-        String[] accountDetails  = decoded.split(":");
+        String[] accountDetails;
+        try {
+            accountDetails  = decoded.split(":");
+        }catch (PatternSyntaxException e){
+            return null;
+        }
+
         if (accountDetails.length != 2)
+            return null;
+        if (!accountDetails[1].matches("-?\\d+(\\.\\d+)?"))
             return null;
         Object user = carParkService.getUser(accountDetails[0]);
         Object user2 = carParkService.getUser((long) Integer.parseInt(accountDetails[1]));

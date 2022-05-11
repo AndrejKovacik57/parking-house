@@ -1,6 +1,7 @@
 package sk.stuba.fei.uim.vsa.pr2.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -19,11 +20,17 @@ import java.util.regex.PatternSyntaxException;
 @Path("/")
 public class CarTypeResource {
     private final CarParkService carParkService = new CarParkService();
-    private final ObjectMapper json = new ObjectMapper();
+    private final ObjectMapper json = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private USER getUserAuth (String authHEad){
         String base64Encoded = authHEad.substring("Basic ".length());
-        String decoded = new String(Base64.getDecoder().decode(base64Encoded));
+        String decoded;
+        try {
+            decoded = new String(Base64.getDecoder().decode(base64Encoded));
+        }catch (IllegalArgumentException e){
+            return null;
+        }
+
         String[] accountDetails;
         try {
             accountDetails  = decoded.split(":");
@@ -46,7 +53,6 @@ public class CarTypeResource {
 
         return (USER) user;
     }
-
 
     @GET
     @Path("/cartypes")

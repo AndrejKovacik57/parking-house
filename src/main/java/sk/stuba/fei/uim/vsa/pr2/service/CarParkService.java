@@ -1053,6 +1053,10 @@ public class CarParkService extends AbstractCarParkService{
         }
 
         CAR_TYPE carType = em.find(CAR_TYPE.class, carTypeId);
+        if(carType == null){
+            em.close();
+            return null;
+        }
 
         if (!carType.getCars().isEmpty()){
             em.close();
