@@ -1,28 +1,24 @@
-package sk.stuba.fei.uim.vsa.pr2.web.response;
+package sk.stuba.fei.uim.vsa.pr2.web.demand;
 
 import java.util.List;
 
-public class CarDto {
+public class CarWithoutReservationDemand {
     private Long id;
     private String vrp;
     private String brand;
     private String model;
     private String colour;
-    private List<ReservationDto> reservations;
-    private Long owner;
-    private CarTypeDto type;
+    private CarTypeDemand type;
 
-    public CarDto() {
+    public CarWithoutReservationDemand() {
     }
 
-    public CarDto(Long id, String vrp, String brand, String model, String colour, List<ReservationDto> reservations, Long owner, CarTypeDto type) {
+    public CarWithoutReservationDemand(Long id, String vrp, String brand, String model, String colour, CarTypeDemand type) {
         this.id = id;
         this.vrp = vrp;
         this.brand = brand;
         this.model = model;
         this.colour = colour;
-        this.reservations = reservations;
-        this.owner = owner;
         this.type = type;
     }
 
@@ -66,27 +62,11 @@ public class CarDto {
         this.colour = colour;
     }
 
-    public List<ReservationDto> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<ReservationDto> reservations) {
-        this.reservations = reservations;
-    }
-
-    public Long getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Long owner) {
-        this.owner = owner;
-    }
-
-    public CarTypeDto getType() {
+    public CarTypeDemand getType() {
         return type;
     }
 
-    public void setType(CarTypeDto type) {
+    public void setType(CarTypeDemand type) {
         this.type = type;
     }
 }

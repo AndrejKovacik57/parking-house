@@ -55,6 +55,7 @@ public class Project2 {
         if (user == null){
             carParkService.createUser("vsa","vsa","admin@vsa.sk");
         }
+
         // TODO sem napíš akékoľvek nastavenia, či volania, ktoré sa majú udiať ihneď po štarte
     }
 

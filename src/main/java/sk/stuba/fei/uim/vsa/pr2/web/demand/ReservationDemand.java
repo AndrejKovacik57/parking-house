@@ -1,28 +1,27 @@
-package sk.stuba.fei.uim.vsa.pr2.web.response;
+package sk.stuba.fei.uim.vsa.pr2.web.demand;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
-public class ReservationDto {
+public class ReservationDemand {
     private Long id;
-    @JsonFormat(pattern="yyyy-MM-dd")
     private Date start;
-    @JsonFormat(pattern="yyyy-MM-dd")
     private Date end;
     private Integer prices;
-    private Long car;
-    private Long parkingSpot;
+    private SpotWithoutReservationDemand spot;
+    private CarWithoutReservationDemand car;
 
-    public ReservationDto() {
+    public ReservationDemand() {
     }
 
-    public ReservationDto(Long id, Date start, Date end, Integer prices, Long car, Long parkingSpot) {
+    public ReservationDemand(Long id, Date start, Date end, Integer prices, SpotWithoutReservationDemand spot, CarWithoutReservationDemand car) {
         this.id = id;
         this.start = start;
         this.end = end;
         this.prices = prices;
+        this.spot = spot;
         this.car = car;
-        this.parkingSpot = parkingSpot;
     }
 
     public Long getId() {
@@ -57,19 +56,19 @@ public class ReservationDto {
         this.prices = prices;
     }
 
-    public Long getCar() {
+    public SpotWithoutReservationDemand getSpot() {
+        return spot;
+    }
+
+    public void setSpot(SpotWithoutReservationDemand spot) {
+        this.spot = spot;
+    }
+
+    public CarWithoutReservationDemand getCar() {
         return car;
     }
 
-    public void setCar(Long car) {
+    public void setCar(CarWithoutReservationDemand car) {
         this.car = car;
-    }
-
-    public Long getParkingSpot() {
-        return parkingSpot;
-    }
-
-    public void setParkingSpot(Long parkingSpot) {
-        this.parkingSpot = parkingSpot;
     }
 }

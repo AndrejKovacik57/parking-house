@@ -1047,11 +1047,13 @@ public class CarParkService extends AbstractCarParkService{
     public Object deleteCarType(Long carTypeId) {
         EntityManager em = emf.createEntityManager();
 
-        CAR_TYPE carType = em.find(CAR_TYPE.class, carTypeId);
         if (carTypeId == null){
             em.close();
             return null;
         }
+
+        CAR_TYPE carType = em.find(CAR_TYPE.class, carTypeId);
+
         if (!carType.getCars().isEmpty()){
             em.close();
             return null;

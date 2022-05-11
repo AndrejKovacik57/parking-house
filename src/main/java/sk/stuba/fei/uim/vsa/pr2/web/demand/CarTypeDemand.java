@@ -1,13 +1,13 @@
-package sk.stuba.fei.uim.vsa.pr2.web.response;
+package sk.stuba.fei.uim.vsa.pr2.web.demand;
 
-public class CarTypeDto {
+public class CarTypeDemand {
     private Long id;
     private String name;
 
-    public CarTypeDto() {
+    public CarTypeDemand() {
     }
 
-    public CarTypeDto(Long id, String name) {
+    public CarTypeDemand(Long id, String name) {
         this.id = id;
         this.name = name;
     }

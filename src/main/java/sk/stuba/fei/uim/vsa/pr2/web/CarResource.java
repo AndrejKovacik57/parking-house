@@ -1,6 +1,7 @@
 package sk.stuba.fei.uim.vsa.pr2.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -10,6 +11,8 @@ import sk.stuba.fei.uim.vsa.pr2.domain.CAR;
 import sk.stuba.fei.uim.vsa.pr2.domain.CAR_TYPE;
 import sk.stuba.fei.uim.vsa.pr2.domain.USER;
 import sk.stuba.fei.uim.vsa.pr2.service.CarParkService;
+import sk.stuba.fei.uim.vsa.pr2.web.demand.CarDemand;
+import sk.stuba.fei.uim.vsa.pr2.web.demand.CarWithOwnerDemand;
 import sk.stuba.fei.uim.vsa.pr2.web.response.*;
 
 import java.util.ArrayList;
@@ -19,64 +22,74 @@ import java.util.List;
 @Path("/")
 public class CarResource {
     private final CarParkService carParkService = new CarParkService();
-    private final ObjectMapper json = new ObjectMapper();
+    private final ObjectMapper json = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private USER getUserAuth (String authHEad){
         String base64Encoded = authHEad.substring("Basic ".length());
         String decoded = new String(Base64.getDecoder().decode(base64Encoded));
-        String email  = decoded.split(":")[0];
-        Object user = carParkService.getUser(email);
-        if (user == null)
+        String[] accountDetails  = decoded.split(":");
+        if (accountDetails.length != 2)
             return null;
+        Object user = carParkService.getUser(accountDetails[0]);
+        Object user2 = carParkService.getUser((long) Integer.parseInt(accountDetails[1]));
+        if (user == null || user2 == null)
+            return null;
+        USER userCast = (USER) user;
+        USER user2Cast = (USER) user2;
+        if(!userCast.getId().equals(user2Cast.getId()))
+            return null;
+
         return (USER) user;
     }
 
-    private CarDto createCarDto(CAR car){
-        CarDto carDto = new CarDto();
-        carDto.setId(car.getId());
-        carDto.setVrp(car.getVehicleRegistrationPlate());
-        carDto.setBrand(car.getBrand());
-        carDto.setModel(car.getModel());
-        carDto.setColour(car.getColour());
-        carDto.setOwner(car.getUser().getId());
-        carDto.setType(new CarTypeDto(car.getCarType().getId(), car.getCarType().getName()));
-        List<ReservationDto> reservationDtoList = new ArrayList<ReservationDto>();
-        car.getReservations().forEach(reservation -> {
-            ReservationDto reservationDto = new ReservationDto();
-            reservationDto.setId(reservation.getId());
-            reservationDto.setStart(reservation.getDate());
-            reservationDto.setEnd(reservation.getEndDate());
-            reservationDto.setPrices(reservation.getParkingCost());
-            reservationDto.setCar(reservation.getCar().getId());
-            reservationDto.setParkingSpot(reservation.getParkingSpot().getId());
-            reservationDtoList.add(reservationDto);
-        });
-        carDto.setReservations(reservationDtoList);
 
-        return carDto;
+    private CarResponse createCarResponse(CAR car){
+        CarResponse carResponse = new CarResponse();
+        carResponse.setId(car.getId());
+        carResponse.setVrp(car.getVehicleRegistrationPlate());
+        carResponse.setBrand(car.getBrand());
+        carResponse.setModel(car.getModel());
+        carResponse.setColour(car.getColour());
+        carResponse.setOwner(car.getUser().getId());
+
+        carResponse.setType(new CarTypeResponse(car.getCarType().getId(), car.getCarType().getName()));
+        List<ReservationResponse> reservationResponseList = new ArrayList<ReservationResponse>();
+        car.getReservations().forEach(reservation -> {
+            ReservationResponse reservationResponse = new ReservationResponse();
+            reservationResponse.setId(reservation.getId());
+            reservationResponse.setStart(reservation.getDate());
+            reservationResponse.setEnd(reservation.getEndDate());
+            reservationResponse.setPrices(reservation.getParkingCost());
+            reservationResponse.setCar(reservation.getCar().getId());
+            reservationResponse.setParkingSpot(reservation.getParkingSpot().getId());
+            reservationResponseList.add(reservationResponse);
+        });
+        carResponse.setReservations(reservationResponseList);
+
+        return carResponse;
     }
-    private List<CarDto> getCarsByUser(Long user){
+    private List<CarResponse> getCarsByUser(Long user){
         List<Object> cars = carParkService.getCars(user);
         if (cars == null)
-            return new ArrayList<CarDto>();
+            return new ArrayList<CarResponse>();
 
         List<CAR> carsCasted = new ArrayList<CAR>();
         cars.forEach(car -> carsCasted.add((CAR) car));
 
-        List<CarDto> carDtoList = new ArrayList<CarDto>();
+        List<CarResponse> carResponseList = new ArrayList<CarResponse>();
 
-        carsCasted.forEach(car -> carDtoList.add(createCarDto(car)));
-        return carDtoList;
+        carsCasted.forEach(car -> carResponseList.add(createCarResponse(car)));
+        return carResponseList;
     }
-    private List<CarDto> getCarsByVrp(String vrp){
+    private List<CarResponse> getCarsByVrp(String vrp){
         Object car = carParkService.getCar(vrp);
         if (car == null)
-            return new ArrayList<CarDto>();
+            return new ArrayList<CarResponse>();
 
-        CarDto carDto = createCarDto((CAR) car);
-        List<CarDto> carDtoList = new ArrayList<CarDto>();
-        carDtoList.add(carDto);
-        return carDtoList;
+        CarResponse carResponse = createCarResponse((CAR) car);
+        List<CarResponse> carResponseList = new ArrayList<CarResponse>();
+        carResponseList.add(carResponse);
+        return carResponseList;
     }
     @GET
     @Path("/cars")
@@ -87,24 +100,18 @@ public class CarResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         if(user != null && vrp == null){
-            List<CarDto> carDtoList = getCarsByUser(user);
-            if (carDtoList.isEmpty())
-                return Response.status(Response.Status.NOT_FOUND).build();
-
-            return Response.status(Response.Status.OK).entity(carDtoList).build();
+            List<CarResponse> carResponseList = getCarsByUser(user);
+            return Response.status(Response.Status.OK).entity(carResponseList).build();
         }
         else if(vrp != null && user == null){
-            List<CarDto> carDtoList = getCarsByVrp(vrp);
-            if (carDtoList.isEmpty())
-                return Response.status(Response.Status.NOT_FOUND).build();
-
-            return Response.status(Response.Status.OK).entity(carDtoList).build();
+            List<CarResponse> carResponseList = getCarsByVrp(vrp);
+            return Response.status(Response.Status.OK).entity(carResponseList).build();
         }
         else if(user != null){
-            List<CarDto> carDtoListVrp = getCarsByVrp(vrp);
-            List<CarDto> carDtoListUser = getCarsByUser(user);
-            List<CarDto> intersectionList = new ArrayList<CarDto>();
-            carDtoListUser.forEach(userCar -> carDtoListVrp.forEach(vrpCar -> {
+            List<CarResponse> carResponseListVrp = getCarsByVrp(vrp);
+            List<CarResponse> carResponseListUser = getCarsByUser(user);
+            List<CarResponse> intersectionList = new ArrayList<CarResponse>();
+            carResponseListUser.forEach(userCar -> carResponseListVrp.forEach(vrpCar -> {
                 if(userCar.getId().equals(vrpCar.getId()))
                     intersectionList.add(vrpCar);
             }));
@@ -113,13 +120,13 @@ public class CarResource {
         else{
             List<CAR> cars = new ArrayList<CAR>();
             carParkService.getCars().forEach(car -> cars.add((CAR) car));
-            List<CarDto> carDtoList = new ArrayList<CarDto>();
+            List<CarResponse> carResponseList = new ArrayList<CarResponse>();
 
             cars.forEach(car ->{
-                CarDto carDto = createCarDto(car);
-                carDtoList.add(carDto);
+                CarResponse carResponse = createCarResponse(car);
+                carResponseList.add(carResponse);
             });
-            return Response.status(Response.Status.OK).entity(carDtoList).build();
+            return Response.status(Response.Status.OK).entity(carResponseList).build();
         }
     }
     @GET
@@ -134,9 +141,9 @@ public class CarResource {
         if (car == null)
             return Response.status(Response.Status.NOT_FOUND).build();
 
-        CarDto carDto = createCarDto((CAR) car);
+        CarResponse carResponse = createCarResponse((CAR) car);
 
-        return Response.status(Response.Status.OK).entity(carDto).build();
+        return Response.status(Response.Status.OK).entity(carResponse).build();
 
     }
     @POST
@@ -149,39 +156,43 @@ public class CarResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         try{
-            CarDtoWithUsers carDto = json.readValue(body, CarDtoWithUsers.class);
+            CarWithOwnerDemand carDemand = json.readValue(body, CarWithOwnerDemand.class);
 
-            if(carDto.getType() == null){
+            if(carDemand.getType() == null){
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            if(carDto.getType().getName() == null){
+            if(carDemand.getType().getName() == null){
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
+            Object user;
+            if (carDemand.getOwner().getId() == null)
+                user = carParkService.getUser(carDemand.getOwner().getEmail());
+            else
+                user = carParkService.getUser(carDemand.getOwner().getId());
 
-            Object user = carParkService.getUser(carDto.getOwner().getId());
             USER userCast;
             Boolean userCreatedBool;
             if (user == null){
-                Object userCreated = carParkService.createUser(carDto.getOwner().getFirstName(),carDto.getOwner().getLastName(),carDto.getOwner().getEmail());
+                Object userCreated = carParkService.createUser(carDemand.getOwner().getFirstName(),carDemand.getOwner().getLastName(),carDemand.getOwner().getEmail());
                 if (userCreated == null)
                     return Response.status(Response.Status.BAD_REQUEST).build();
                 else{
                     userCast = (USER) userCreated;
                     userCreatedBool = Boolean.TRUE;
                 }
-
             }
             else{
                 userCast = (USER) user;
+//                if (!userCast.getFirstName().equals(carDemand.getOwner().getFirstName()) || !userCast.getLastName().equals(carDemand.getOwner().getLastName()))
+//                    return Response.status(Response.Status.BAD_REQUEST).build();
                 userCreatedBool = Boolean.FALSE;
             }
 
-
-            Object carType = carParkService.getCarType(carDto.getType().getName());
+            Object carType = carParkService.getCarType(carDemand.getType().getName());
             CAR_TYPE carTypeCasted;
             Boolean typeCreated;
             if (carType == null){
-                carTypeCasted = (CAR_TYPE) carParkService.createCarType(carDto.getType().getName());
+                carTypeCasted = (CAR_TYPE) carParkService.createCarType(carDemand.getType().getName());
                 typeCreated = Boolean.TRUE;
             }
 
@@ -190,7 +201,7 @@ public class CarResource {
                 typeCreated = Boolean.FALSE;
             }
 
-            Object carCreated = carParkService.createCar(userCast.getId(),carDto.getBrand(),carDto.getModel(),carDto.getColour(),carDto.getVrp(),carTypeCasted.getId());
+            Object carCreated = carParkService.createCar(userCast.getId(),carDemand.getBrand(),carDemand.getModel(),carDemand.getColour(),carDemand.getVrp(),carTypeCasted.getId());
             if(carCreated == null){
                 if (typeCreated)
                     carParkService.deleteCarType(carTypeCasted.getId());
@@ -201,8 +212,9 @@ public class CarResource {
 
 
             CAR carCreatedCast = (CAR) carCreated;
-            CAR carCreatedWhole = (CAR) carParkService.getUser(carCreatedCast.getId());
-            return Response.status(Response.Status.CREATED).entity(createCarDto(carCreatedWhole)).build();
+
+            System.err.println(carCreated);
+            return Response.status(Response.Status.CREATED).entity(createCarResponse(carCreatedCast)).build();
 
         }catch(JsonProcessingException e){
             System.err.println(e.getMessage());
@@ -219,14 +231,14 @@ public class CarResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         try{
-            CarDto carDto = json.readValue(body, CarDto.class);
-            CAR car =  new CAR(carDto.getVrp(),carDto.getBrand(),carDto.getModel(),carDto.getColour());
+            CarResponse carResponse = json.readValue(body, CarResponse.class);
+            CAR car =  new CAR(carResponse.getVrp(), carResponse.getBrand(), carResponse.getModel(), carResponse.getColour());
             car.setId(id);
             Object carUpdated = carParkService.updateCar(car);
             if (carUpdated == null)
                 return Response.status(Response.Status.BAD_REQUEST).build();
 
-            return Response.status(Response.Status.OK).entity(createCarDto((CAR) carUpdated)).build();
+            return Response.status(Response.Status.OK).entity(createCarResponse((CAR) carUpdated)).build();
 
         }catch (JsonProcessingException e){
             System.err.println(e.getMessage());

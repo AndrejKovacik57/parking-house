@@ -1,18 +1,18 @@
-package sk.stuba.fei.uim.vsa.pr2.web.response;
+package sk.stuba.fei.uim.vsa.pr2.web.demand;
 
 import java.util.List;
 
-public class UserDtoWithCarReferences {
+public class UserDemand {
     private Long id;
     private String firstName;
     private String lastName;
     private String email;
-    private List<Long> cars;
+    private List<CarDemand> cars;
 
-    public UserDtoWithCarReferences() {
+    public UserDemand() {
     }
 
-    public UserDtoWithCarReferences(Long id, String firstName, String lastName, String email, List<Long> cars) {
+    public UserDemand(Long id, String firstName, String lastName, String email, List<CarDemand> cars) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -52,11 +52,12 @@ public class UserDtoWithCarReferences {
         this.email = email;
     }
 
-    public List<Long> getCars() {
+    public List<CarDemand> getCars() {
         return cars;
     }
 
-    public void setCars(List<Long> cars) {
+    public void setCars(List<CarDemand> cars) {
         this.cars = cars;
     }
 }
+

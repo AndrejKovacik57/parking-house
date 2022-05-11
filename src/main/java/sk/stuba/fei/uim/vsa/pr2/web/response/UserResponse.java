@@ -3,17 +3,17 @@ package sk.stuba.fei.uim.vsa.pr2.web.response;
 
 import java.util.List;
 
-public class UserDto {
+public class UserResponse {
     private Long id;
     private String firstName;
     private String lastName;
     private String email;
-    private List<CarDto> cars;
+    private List<CarResponse> cars;
 
-    public UserDto() {
+    public UserResponse() {
     }
 
-    public UserDto(Long id, String firstName, String lastName, String email, List<CarDto> cars) {
+    public UserResponse(Long id, String firstName, String lastName, String email, List<CarResponse> cars) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -53,11 +53,11 @@ public class UserDto {
         this.email = email;
     }
 
-    public List<CarDto> getCars() {
+    public List<CarResponse> getCars() {
         return cars;
     }
 
-    public void setCars(List<CarDto> cars) {
+    public void setCars(List<CarResponse> cars) {
         this.cars = cars;
     }
 }

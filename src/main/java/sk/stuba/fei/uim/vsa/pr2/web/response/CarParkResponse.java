@@ -3,17 +3,17 @@ package sk.stuba.fei.uim.vsa.pr2.web.response;
 
 import java.util.List;
 
-public class CarParkDto {
+public class CarParkResponse {
     private Long id;
     private String address;
     private String name;
     private Integer prices;
-    private List<CarParkFloorDto> floors;
+    private List<CarParkFloorResponse> floors;
 
-    public CarParkDto() {
+    public CarParkResponse() {
     }
 
-    public CarParkDto(Long id, String address, String name, Integer pricePerHour, List<CarParkFloorDto> floors) {
+    public CarParkResponse(Long id, String address, String name, Integer pricePerHour, List<CarParkFloorResponse> floors) {
         this.id = id;
         this.address = address;
         this.name = name;
@@ -53,11 +53,11 @@ public class CarParkDto {
         this.prices = prices;
     }
 
-    public List<CarParkFloorDto> getFloors() {
+    public List<CarParkFloorResponse> getFloors() {
         return floors;
     }
 
-    public void setFloors(List<CarParkFloorDto> carParkFloorsDto) {
+    public void setFloors(List<CarParkFloorResponse> carParkFloorsDto) {
         this.floors = carParkFloorsDto;
     }
 }

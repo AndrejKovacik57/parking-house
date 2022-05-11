@@ -2,15 +2,15 @@ package sk.stuba.fei.uim.vsa.pr2.web.response;
 
 import java.util.List;
 
-public class CarParkFloorDto {
+public class CarParkFloorResponse {
     private String identifier;
     private Long carPark;
-    private List<ParkingSpotDto> spots;
+    private List<ParkingSpotResponse> spots;
 
-    public CarParkFloorDto() {
+    public CarParkFloorResponse() {
     }
 
-    public CarParkFloorDto(String identifier, Long carParkId, List<ParkingSpotDto> parkingSpotsDto) {
+    public CarParkFloorResponse(String identifier, Long carParkId, List<ParkingSpotResponse> parkingSpotsDto) {
         this.identifier = identifier;
         this.carPark = carParkId;
         this.spots = parkingSpotsDto;
@@ -32,11 +32,11 @@ public class CarParkFloorDto {
         this.carPark = carPark;
     }
 
-    public List<ParkingSpotDto> getSpots() {
+    public List<ParkingSpotResponse> getSpots() {
         return spots;
     }
 
-    public void setSpots(List<ParkingSpotDto> spots) {
+    public void setSpots(List<ParkingSpotResponse> spots) {
         this.spots = spots;
     }
 }

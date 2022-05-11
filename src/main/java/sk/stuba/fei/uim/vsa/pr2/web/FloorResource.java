@@ -1,12 +1,14 @@
 package sk.stuba.fei.uim.vsa.pr2.web;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import sk.stuba.fei.uim.vsa.pr2.domain.*;
-import sk.stuba.fei.uim.vsa.pr2.exception.NotInitializedException;
+import sk.stuba.fei.uim.vsa.pr2.web.demand.CarParkFloorDemand;
+import sk.stuba.fei.uim.vsa.pr2.web.demand.ParkingSpotDemand;
 import sk.stuba.fei.uim.vsa.pr2.web.response.*;
 import sk.stuba.fei.uim.vsa.pr2.service.CarParkService;
 
@@ -16,51 +18,60 @@ import java.util.*;
 @Path("/")
 public class FloorResource {
     private final CarParkService carParkService = new CarParkService();
-    private final ObjectMapper json = new ObjectMapper();
+    private final ObjectMapper json = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private USER getUserAuth (String authHEad){
         String base64Encoded = authHEad.substring("Basic ".length());
         String decoded = new String(Base64.getDecoder().decode(base64Encoded));
-        String email  = decoded.split(":")[0];
-        Object user = carParkService.getUser(email);
-        if (user == null)
+        String[] accountDetails  = decoded.split(":");
+        if (accountDetails.length != 2)
             return null;
+        Object user = carParkService.getUser(accountDetails[0]);
+        Object user2 = carParkService.getUser((long) Integer.parseInt(accountDetails[1]));
+        if (user == null || user2 == null)
+            return null;
+        USER userCast = (USER) user;
+        USER user2Cast = (USER) user2;
+        if(!userCast.getId().equals(user2Cast.getId()))
+            return null;
+
         return (USER) user;
     }
 
-    private CarParkFloorDto createCarParkFloorDto(CAR_PARK_FLOOR carParkFloor){
-        CarParkFloorDto carParkFloorDto = new CarParkFloorDto();
-        carParkFloorDto.setIdentifier(carParkFloor.getId().getFloorIdentifier());
-        carParkFloorDto.setCarPark(carParkFloor.getCarPark().getId());
 
-        List<ParkingSpotDto> parkingSpotDtoList = new ArrayList<ParkingSpotDto>();
+    private CarParkFloorResponse createCarParkFloorDto(CAR_PARK_FLOOR carParkFloor){
+        CarParkFloorResponse carParkFloorResponse = new CarParkFloorResponse();
+        carParkFloorResponse.setIdentifier(carParkFloor.getId().getFloorIdentifier());
+        carParkFloorResponse.setCarPark(carParkFloor.getCarPark().getId());
+
+        List<ParkingSpotResponse> parkingSpotResponseList = new ArrayList<ParkingSpotResponse>();
 
         carParkFloor.getParkingSpots().forEach(parkingSpot -> {
-            ParkingSpotDto parkingSpotDto = new ParkingSpotDto();
-            parkingSpotDto.setId(parkingSpot.getId());
-            parkingSpotDto.setIdentifier(parkingSpot.getSpotIdentifier());
-            parkingSpotDto.setCarParkFloor(parkingSpot.getCarParkFloor().getId().getFloorIdentifier());
-            parkingSpotDto.setCarPark(parkingSpot.getCarParkFloor().getCarPark().getId());
-            parkingSpotDto.setType(new CarTypeDto(parkingSpot.getCarType().getId(), parkingSpot.getCarType().getName()));
-            parkingSpotDto.setFree(!parkingSpot.getOccupied());
+            ParkingSpotResponse parkingSpotResponse = new ParkingSpotResponse();
+            parkingSpotResponse.setId(parkingSpot.getId());
+            parkingSpotResponse.setIdentifier(parkingSpot.getSpotIdentifier());
+            parkingSpotResponse.setCarParkFloor(parkingSpot.getCarParkFloor().getId().getFloorIdentifier());
+            parkingSpotResponse.setCarPark(parkingSpot.getCarParkFloor().getCarPark().getId());
+            parkingSpotResponse.setType(new CarTypeResponse(parkingSpot.getCarType().getId(), parkingSpot.getCarType().getName()));
+            parkingSpotResponse.setFree(!parkingSpot.getOccupied());
 
-            List<ReservationDto> reservationDtoList = new ArrayList<ReservationDto>();
+            List<ReservationResponse> reservationResponseList = new ArrayList<ReservationResponse>();
             parkingSpot.getReservations().forEach(reservation -> {
-                ReservationDto reservationDto = new ReservationDto();
-                reservationDto.setId(reservation.getId());
-                reservationDto.setStart(reservation.getDate());
-                reservationDto.setEnd(reservation.getEndDate());
-                reservationDto.setPrices(reservation.getParkingCost());
-                reservationDto.setCar(reservation.getCar().getId());
-                reservationDto.setParkingSpot(reservation.getParkingSpot().getId());
-                reservationDtoList.add(reservationDto);
+                ReservationResponse reservationResponse = new ReservationResponse();
+                reservationResponse.setId(reservation.getId());
+                reservationResponse.setStart(reservation.getDate());
+                reservationResponse.setEnd(reservation.getEndDate());
+                reservationResponse.setPrices(reservation.getParkingCost());
+                reservationResponse.setCar(reservation.getCar().getId());
+                reservationResponse.setParkingSpot(reservation.getParkingSpot().getId());
+                reservationResponseList.add(reservationResponse);
             });
-            parkingSpotDto.setReservations(reservationDtoList);
-            parkingSpotDtoList.add(parkingSpotDto);
+            parkingSpotResponse.setReservations(reservationResponseList);
+            parkingSpotResponseList.add(parkingSpotResponse);
         });
-        carParkFloorDto.setSpots(parkingSpotDtoList);
+        carParkFloorResponse.setSpots(parkingSpotResponseList);
 
-        return  carParkFloorDto;
+        return carParkFloorResponse;
     }
 
     @GET
@@ -79,14 +90,14 @@ public class FloorResource {
         objectArraylist.forEach(floor -> {
             carParkFloors.add((CAR_PARK_FLOOR) floor);
         });
-        List<CarParkFloorDto> CarParkFloorDtoArrayList = new ArrayList<CarParkFloorDto>();
+        List<CarParkFloorResponse> carParkFloorResponseArrayList = new ArrayList<CarParkFloorResponse>();
 
         carParkFloors.forEach(floor ->{
-            CarParkFloorDto carParkFloorDto = createCarParkFloorDto(floor);
-            CarParkFloorDtoArrayList.add(carParkFloorDto);
+            CarParkFloorResponse carParkFloorResponse = createCarParkFloorDto(floor);
+            carParkFloorResponseArrayList.add(carParkFloorResponse);
         });
 
-        return Response.status(Response.Status.OK).entity(CarParkFloorDtoArrayList).build();
+        return Response.status(Response.Status.OK).entity(carParkFloorResponseArrayList).build();
 
     }
 
@@ -102,9 +113,9 @@ public class FloorResource {
         if (carParkFloor == null)
             return Response.status(Response.Status.NOT_FOUND).build();
 
-        CarParkFloorDto carParkFloorDto = createCarParkFloorDto((CAR_PARK_FLOOR) carParkFloor);
+        CarParkFloorResponse carParkFloorResponse = createCarParkFloorDto((CAR_PARK_FLOOR) carParkFloor);
 
-        return Response.status(Response.Status.OK).entity(carParkFloorDto).build();
+        return Response.status(Response.Status.OK).entity(carParkFloorResponse).build();
 
     }
 
@@ -118,7 +129,7 @@ public class FloorResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         try{
-            CarParkFloorDto carParkDto = json.readValue(body, CarParkFloorDto.class);
+            CarParkFloorDemand carParkDto = json.readValue(body, CarParkFloorDemand.class);
 
 
             Object carParkFloorCreated = carParkService.createCarParkFloor(id,carParkDto.getIdentifier());
@@ -128,8 +139,8 @@ public class FloorResource {
 
             CAR_PARK_FLOOR carParkFloorCreatedCast = (CAR_PARK_FLOOR) carParkFloorCreated;
 
-            try {
-                for (ParkingSpotDto parkingSpot :carParkDto.getSpots()){
+            if (carParkDto.getSpots() != null)
+                for (ParkingSpotDemand parkingSpot :carParkDto.getSpots()){
                     if(parkingSpot.getType() == null){
                         carParkService.deleteCarParkFloor(id,carParkDto.getIdentifier());
                         return Response.status(Response.Status.BAD_REQUEST).build();
@@ -161,8 +172,6 @@ public class FloorResource {
                         return Response.status(Response.Status.BAD_REQUEST).build();
                     }
                 }
-            }catch (NotInitializedException ignore){}
-
 
             CAR_PARK_FLOOR carParkFloorCreatedWhole = (CAR_PARK_FLOOR) carParkService.getCarParkFloor(carParkFloorCreatedCast.getCarPark().getId(),carParkFloorCreatedCast.getId().getFloorIdentifier());
             return Response.status(Response.Status.CREATED).entity(createCarParkFloorDto(carParkFloorCreatedWhole)).build();

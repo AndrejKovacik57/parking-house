@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.Response;
 import sk.stuba.fei.uim.vsa.pr2.domain.RESERVATION;
 import sk.stuba.fei.uim.vsa.pr2.domain.USER;
 import sk.stuba.fei.uim.vsa.pr2.service.CarParkService;
+import sk.stuba.fei.uim.vsa.pr2.web.demand.ReservationDemand;
 import sk.stuba.fei.uim.vsa.pr2.web.response.*;
 
 import java.util.ArrayList;
@@ -24,38 +25,46 @@ public class ReservationResource {
     private USER getUserAuth (String authHEad){
         String base64Encoded = authHEad.substring("Basic ".length());
         String decoded = new String(Base64.getDecoder().decode(base64Encoded));
-        String email  = decoded.split(":")[0];
-        Object user = carParkService.getUser(email);
-        if (user == null)
+        String[] accountDetails  = decoded.split(":");
+        if (accountDetails.length != 2)
             return null;
+        Object user = carParkService.getUser(accountDetails[0]);
+        Object user2 = carParkService.getUser((long) Integer.parseInt(accountDetails[1]));
+        if (user == null || user2 == null)
+            return null;
+        USER userCast = (USER) user;
+        USER user2Cast = (USER) user2;
+        if(!userCast.getId().equals(user2Cast.getId()))
+            return null;
+
         return (USER) user;
     }
 
-    private ReservationDto createReservationDto(RESERVATION reservation){
-        ReservationDto reservationDto = new ReservationDto();
-        reservationDto.setId(reservationDto.getId());
-        reservationDto.setStart(reservation.getDate());
-        reservationDto.setEnd(reservation.getEndDate());
-        reservationDto.setPrices(reservation.getParkingCost());
-        reservationDto.setCar(reservation.getCar().getId());
-        reservationDto.setParkingSpot(reservation.getParkingSpot().getId());
-        return reservationDto;
+    private ReservationResponse createReservationDto(RESERVATION reservation){
+        ReservationResponse reservationResponse = new ReservationResponse();
+        reservationResponse.setId(reservation.getId());
+        reservationResponse.setStart(reservation.getDate());
+        reservationResponse.setEnd(reservation.getEndDate());
+        reservationResponse.setPrices(reservation.getParkingCost());
+        reservationResponse.setCar(reservation.getCar().getId());
+        reservationResponse.setParkingSpot(reservation.getParkingSpot().getId());
+        return reservationResponse;
     }
-    private List<ReservationDto> getReservationBySpotAndDate(Long spot, Date date){
+    private List<ReservationResponse> getReservationBySpotAndDate(Long spot, Date date){
         List<Object> reservations = carParkService.getReservations(spot,date);
         if (reservations == null)
-            return new ArrayList<ReservationDto>();
+            return new ArrayList<ReservationResponse>();
 
-        List<ReservationDto> reservationsDto= new ArrayList<ReservationDto>();
+        List<ReservationResponse> reservationsDto= new ArrayList<ReservationResponse>();
         reservations.forEach(reservation -> reservationsDto.add(createReservationDto(((RESERVATION) reservation))));
 
         return reservationsDto;
     }
-    private List<ReservationDto> getUserReservations(Long user){
+    private List<ReservationResponse> getUserReservations(Long user){
         List<Object> reservations = carParkService.getMyReservations(user);
         if (reservations == null)
-            return new ArrayList<ReservationDto>();
-        List<ReservationDto> reservationsDto= new ArrayList<ReservationDto>();
+            return new ArrayList<ReservationResponse>();
+        List<ReservationResponse> reservationsDto= new ArrayList<ReservationResponse>();
 
         reservations.forEach(reservation -> reservationsDto.add(createReservationDto(((RESERVATION) reservation))));
 
@@ -73,16 +82,11 @@ public class ReservationResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         else if (user != null && spot != null){
-            List<ReservationDto> reservationsUserDto = getUserReservations(user);
-            if (reservationsUserDto.isEmpty())
-                return Response.status(Response.Status.NOT_FOUND).build();
+            List<ReservationResponse> reservationsUserResponse = getUserReservations(user);
+            List<ReservationResponse> reservationsSpotAndDateResponse = getReservationBySpotAndDate(spot, date);
 
-            List<ReservationDto> reservationsSpotAndDateDto = getReservationBySpotAndDate(spot, date);
-            if (reservationsSpotAndDateDto.isEmpty())
-                return Response.status(Response.Status.NOT_FOUND).build();
-
-            List<ReservationDto> intersectionList = new ArrayList<ReservationDto>();
-            reservationsUserDto.forEach(userRes -> reservationsSpotAndDateDto.forEach(spotRes -> {
+            List<ReservationResponse> intersectionList = new ArrayList<ReservationResponse>();
+            reservationsUserResponse.forEach(userRes -> reservationsSpotAndDateResponse.forEach(spotRes -> {
                 if(userRes.getId().equals(spotRes.getId()))
                     intersectionList.add(spotRes);
             }));
@@ -90,21 +94,15 @@ public class ReservationResource {
 
         }
         else if (user != null){
-            List<ReservationDto> reservationsDto = getUserReservations(user);
-            if (reservationsDto.isEmpty())
-                return Response.status(Response.Status.NOT_FOUND).build();
-
+            List<ReservationResponse> reservationsDto = getUserReservations(user);
             return Response.status(Response.Status.OK).entity(reservationsDto).build();
         }
         else if (spot != null){
-            List<ReservationDto> reservationsDto = getReservationBySpotAndDate(spot, date);
-            if (reservationsDto.isEmpty())
-                return Response.status(Response.Status.NOT_FOUND).build();
-
+            List<ReservationResponse> reservationsDto = getReservationBySpotAndDate(spot, date);
             return Response.status(Response.Status.OK).entity(reservationsDto).build();
         }else{
             List<Object> reservations = carParkService.getReservations();
-            List<ReservationDto> reservationsDto= new ArrayList<ReservationDto>();
+            List<ReservationResponse> reservationsDto= new ArrayList<ReservationResponse>();
             reservations.forEach(reservation -> reservationsDto.add(createReservationDto(((RESERVATION) reservation))));
 
             return Response.status(Response.Status.OK).entity(reservationsDto).build();
@@ -114,7 +112,7 @@ public class ReservationResource {
     @GET
     @Path("/reservations/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCarParks(@HeaderParam(HttpHeaders.AUTHORIZATION) String Athetization,@PathParam("id") Long id){
+    public Response getReservations(@HeaderParam(HttpHeaders.AUTHORIZATION) String Athetization,@PathParam("id") Long id){
         USER userAuth = getUserAuth(Athetization);
         if (userAuth == null)
             return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -123,9 +121,9 @@ public class ReservationResource {
         if (reservation == null)
             return Response.status(Response.Status.NOT_FOUND).build();
 
-        ReservationDto reservationDto = createReservationDto((RESERVATION) reservation);
+        ReservationResponse reservationResponse = createReservationDto((RESERVATION) reservation);
 
-        return Response.status(Response.Status.OK).entity(reservationDto).build();
+        return Response.status(Response.Status.OK).entity(reservationResponse).build();
 
     }
     @POST
@@ -145,15 +143,12 @@ public class ReservationResource {
         if(!reservationCasted.getCar().getUser().getId().equals(userAuth.getId()))
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
-        if (!body.equals("{}"))
-            return Response.status(Response.Status.BAD_REQUEST).build();
-
         Object reservationEnd = carParkService.endReservation(id);
         if (reservationEnd == null)
             return Response.status(Response.Status.BAD_REQUEST).build();
-        ReservationDto reservationDto = createReservationDto((RESERVATION) reservationEnd);
+        ReservationResponse reservationResponse = createReservationDto((RESERVATION) reservationEnd);
 
-        return Response.status(Response.Status.OK).entity(reservationDto).build();
+        return Response.status(Response.Status.OK).entity(reservationResponse).build();
 
     }
 
@@ -167,14 +162,14 @@ public class ReservationResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         try{
-            ReservationDto reservationDto = json.readValue(body, ReservationDto.class);
-            Object reservatonCreated = carParkService.createReservation(reservationDto.getParkingSpot(),reservationDto.getCar());
+            ReservationDemand reservationDemand = json.readValue(body, ReservationDemand.class);
+            Object reservatonCreated = carParkService.createReservation(reservationDemand.getSpot().getId(),reservationDemand.getCar().getId());
             if (reservatonCreated == null)
                 return Response.status(Response.Status.BAD_REQUEST).build();
 
-            ReservationDto reservatonCreatedDto = createReservationDto((RESERVATION) reservatonCreated);
+            ReservationResponse reservatonCreatedDto = createReservationDto((RESERVATION) reservatonCreated);
 
-            return Response.status(Response.Status.OK).entity(reservatonCreatedDto).build();
+            return Response.status(Response.Status.CREATED).entity(reservatonCreatedDto).build();
 
         }catch (JsonProcessingException e){
             System.err.println(e.getMessage());
@@ -192,8 +187,8 @@ public class ReservationResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         try{
-            ReservationDto reservationDto = json.readValue(body, ReservationDto.class);
-            RESERVATION reservation = new RESERVATION(reservationDto.getStart());
+            ReservationDemand reservationDemand = json.readValue(body, ReservationDemand.class);
+            RESERVATION reservation = new RESERVATION(reservationDemand.getStart());
             reservation.setId(id);
 
             Object reservationUpdated = carParkService.updateReservation(reservation);

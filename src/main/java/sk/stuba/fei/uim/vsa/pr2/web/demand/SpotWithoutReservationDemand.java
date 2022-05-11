@@ -1,27 +1,26 @@
-package sk.stuba.fei.uim.vsa.pr2.web.response;
+package sk.stuba.fei.uim.vsa.pr2.web.demand;
+
+import sk.stuba.fei.uim.vsa.pr2.web.response.CarTypeResponse;
 
 import java.util.List;
 
-public class ParkingSpotDto {
+public class SpotWithoutReservationDemand {
     private Long id;
     private Boolean free;
     private String identifier;
     private String carParkFloor;
-    private Long carPark;
-    private CarTypeDto type;
-    private List<ReservationDto> reservations;
+    private CarTypeResponse type;
 
-    public ParkingSpotDto() {
+    public SpotWithoutReservationDemand() {
     }
 
-    public ParkingSpotDto(Long id, Boolean free, String identifier, String carParkFloor, Long carPark, CarTypeDto type, List<ReservationDto>  reservations) {
+    public SpotWithoutReservationDemand(Long id, Boolean free, String identifier, String carParkFloor, CarTypeResponse type) {
         this.id = id;
         this.free = free;
         this.identifier = identifier;
         this.carParkFloor = carParkFloor;
-        this.carPark = carPark;
         this.type = type;
-        this.reservations = reservations;
+
     }
 
     public Long getId() {
@@ -56,27 +55,11 @@ public class ParkingSpotDto {
         this.carParkFloor = carParkFloor;
     }
 
-    public Long getCarPark() {
-        return carPark;
-    }
-
-    public void setCarPark(Long carPark) {
-        this.carPark = carPark;
-    }
-
-    public CarTypeDto getType() {
+    public CarTypeResponse getType() {
         return type;
     }
 
-    public void setType(CarTypeDto type) {
+    public void setType(CarTypeResponse type) {
         this.type = type;
-    }
-
-    public List<ReservationDto> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<ReservationDto> reservations) {
-        this.reservations = reservations;
     }
 }
