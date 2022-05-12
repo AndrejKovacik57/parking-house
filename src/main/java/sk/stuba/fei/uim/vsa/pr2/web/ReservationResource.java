@@ -154,17 +154,17 @@ public class ReservationResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response reservationEnd(@HeaderParam(HttpHeaders.AUTHORIZATION) String Athetization, @PathParam("id") Long id, String body){
-//        USER userAuth = getUserAuth(Athetization);
-//        if (userAuth == null)
-//            return Response.status(Response.Status.UNAUTHORIZED).build();
+        USER userAuth = getUserAuth(Athetization);
+        if (userAuth == null)
+            return Response.status(Response.Status.UNAUTHORIZED).build();
 
         Object reservation = carParkService.getReservation(id);
         if (reservation == null)
             return Response.status(Response.Status.BAD_REQUEST).build();
 
         RESERVATION reservationCasted = (RESERVATION) reservation;
-//        if(!reservationCasted.getCar().getUser().getId().equals(userAuth.getId()))
-//            return Response.status(Response.Status.UNAUTHORIZED).build();
+        if(!reservationCasted.getCar().getUser().getId().equals(userAuth.getId()))
+            return Response.status(Response.Status.UNAUTHORIZED).build();
 
         Object reservationEnd = carParkService.endReservation(id);
         if (reservationEnd == null)
