@@ -179,16 +179,20 @@ public class CarParkResource {
                     }
                     if (floor.getSpots() != null)
                         for (ParkingSpotDemand parkingSpot :floor.getSpots()){
-                            if(parkingSpot.getType() == null){
-                                carParkService.deleteCarPark((carParkCreatedCast.getId()));
-                                return Response.status(Response.Status.BAD_REQUEST).build();
-                            }
-                            if(parkingSpot.getType().getName() == null){
-                                carParkService.deleteCarPark((carParkCreatedCast.getId()));
-                                return Response.status(Response.Status.BAD_REQUEST).build();
+
+                            Object carType;
+                            if(parkingSpot.getType().getId() == null && parkingSpot.getType().getName() != null){
+                                carType = carParkService.getCarType(parkingSpot.getType().getName());
+                                if (carType == null)
+                                    return Response.status(Response.Status.BAD_REQUEST).build();
                             }
 
-                            Object carType = carParkService.getCarType(parkingSpot.getType().getName());
+                            else if(parkingSpot.getType().getName() == null)
+                                return Response.status(Response.Status.BAD_REQUEST).build();
+
+                            else
+                                carType = carParkService.getCarType(parkingSpot.getType().getId());
+
                             CAR_TYPE carTypeCasted;
                             Boolean typeCreated;
                             if (carType == null){

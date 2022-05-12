@@ -138,28 +138,35 @@ public class FloorResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         try{
-            CarParkFloorDemand carParkDto = json.readValue(body, CarParkFloorDemand.class);
+            CarParkFloorDemand carParkFloorDemand= json.readValue(body, CarParkFloorDemand.class);
 
 
-            Object carParkFloorCreated = carParkService.createCarParkFloor(id,carParkDto.getIdentifier());
+            Object carParkFloorCreated = carParkService.createCarParkFloor(id,carParkFloorDemand.getIdentifier());
 
             if (carParkFloorCreated == null)
                 return Response.status(Response.Status.BAD_REQUEST).build();
 
             CAR_PARK_FLOOR carParkFloorCreatedCast = (CAR_PARK_FLOOR) carParkFloorCreated;
 
-            if (carParkDto.getSpots() != null)
-                for (ParkingSpotDemand parkingSpot :carParkDto.getSpots()){
-                    if(parkingSpot.getType() == null){
-                        carParkService.deleteCarParkFloor(id,carParkDto.getIdentifier());
+            if (carParkFloorDemand.getSpots() != null)
+                for (ParkingSpotDemand parkingSpot :carParkFloorDemand.getSpots()){
+
+                    if(parkingSpot.getType() == null )
                         return Response.status(Response.Status.BAD_REQUEST).build();
-                    }
-                    if(parkingSpot.getType().getName() == null){
-                        carParkService.deleteCarParkFloor(id,carParkDto.getIdentifier());
-                        return Response.status(Response.Status.BAD_REQUEST).build();
+
+                    Object carType;
+                    if(parkingSpot.getType().getId() == null && parkingSpot.getType().getName() != null){
+                        carType = carParkService.getCarType(parkingSpot.getType().getName());
+                        if (carType == null)
+                            return Response.status(Response.Status.BAD_REQUEST).build();
                     }
 
-                    Object carType = carParkService.getCarType(parkingSpot.getType().getName());
+                    else if(parkingSpot.getType().getName() == null)
+                        return Response.status(Response.Status.BAD_REQUEST).build();
+
+                    else
+                        carType = carParkService.getCarType(parkingSpot.getType().getId());
+
                     CAR_TYPE carTypeCasted;
                     Boolean typeCreated;
                     if (carType == null){
@@ -177,7 +184,7 @@ public class FloorResource {
                         if (typeCreated)
                             carParkService.deleteCarType(carTypeCasted.getId());
 
-                        carParkService.deleteCarParkFloor(carParkDto.getCarPark(),carParkDto.getIdentifier());
+                        carParkService.deleteCarParkFloor(carParkFloorDemand.getCarPark(),carParkFloorDemand.getIdentifier());
                         return Response.status(Response.Status.BAD_REQUEST).build();
                     }
                 }

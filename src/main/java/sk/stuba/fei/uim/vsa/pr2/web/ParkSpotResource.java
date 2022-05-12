@@ -173,19 +173,28 @@ public class ParkSpotResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
 
         try{
-            ParkingSpotDemand parkingSpotResponse = json.readValue(body, ParkingSpotDemand.class);
+            ParkingSpotDemand parkingSpotDemand = json.readValue(body, ParkingSpotDemand.class);
 
-            if(parkingSpotResponse.getType() == null)
+            if(parkingSpotDemand.getType() == null )
                 return Response.status(Response.Status.BAD_REQUEST).build();
 
-            if(parkingSpotResponse.getType().getName() == null)
+            Object carType;
+            if(parkingSpotDemand.getType().getId() == null && parkingSpotDemand.getType().getName() != null){
+                carType = carParkService.getCarType(parkingSpotDemand.getType().getName());
+                if (carType == null)
+                    return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            else if(parkingSpotDemand.getType().getName() == null)
                 return Response.status(Response.Status.BAD_REQUEST).build();
 
-            Object carType = carParkService.getCarType(parkingSpotResponse.getType().getName());
+            else
+                carType = carParkService.getCarType(parkingSpotDemand.getType().getId());
+
             CAR_TYPE carTypeCasted;
             Boolean typeCreated;
             if (carType == null){
-                carTypeCasted = (CAR_TYPE) carParkService.createCarType(parkingSpotResponse.getType().getName());
+                carTypeCasted = (CAR_TYPE) carParkService.createCarType(parkingSpotDemand.getType().getName());
                 typeCreated = Boolean.TRUE;
             }
 
@@ -194,7 +203,7 @@ public class ParkSpotResource {
                 typeCreated = Boolean.FALSE;
             }
 
-            Object parkingSpotCreated = carParkService.createParkingSpot(id, identifier, parkingSpotResponse.getIdentifier(), carTypeCasted.getId());
+            Object parkingSpotCreated = carParkService.createParkingSpot(id, identifier, parkingSpotDemand.getIdentifier(), carTypeCasted.getId());
             if (parkingSpotCreated == null){
                 if (typeCreated)
                     carParkService.deleteCarType(carTypeCasted.getId());

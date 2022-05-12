@@ -167,12 +167,22 @@ public class CarResource {
         try{
             CarWithOwnerDemand carDemand = json.readValue(body, CarWithOwnerDemand.class);
 
-            if(carDemand.getType() == null){
+            if(carDemand.getType() == null )
                 return Response.status(Response.Status.BAD_REQUEST).build();
+
+            Object carType;
+            if(carDemand.getType().getId() == null && carDemand.getType().getName() != null){
+                carType = carParkService.getCarType(carDemand.getType().getName());
+                if (carType == null)
+                    return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            if(carDemand.getType().getName() == null){
+
+            else if(carDemand.getType().getName() == null)
                 return Response.status(Response.Status.BAD_REQUEST).build();
-            }
+
+            else
+                carType = carParkService.getCarType(carDemand.getType().getId());
+
             Object user;
             if (carDemand.getOwner().getId() == null)
                 user = carParkService.getUser(carDemand.getOwner().getEmail());
@@ -197,7 +207,7 @@ public class CarResource {
                 userCreatedBool = Boolean.FALSE;
             }
 
-            Object carType = carParkService.getCarType(carDemand.getType().getName());
+
             CAR_TYPE carTypeCasted;
             Boolean typeCreated;
             if (carType == null){

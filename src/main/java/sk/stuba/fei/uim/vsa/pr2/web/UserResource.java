@@ -154,16 +154,22 @@ public class UserResource {
             if(userDemand.getCars() != null)
                 for(CarDemand carDemand : userDemand.getCars()){
 
-                    if(carDemand.getType() == null){
-                        carParkService.deleteUser(userCreatedCast.getId());
+                    if(carDemand.getType() == null )
                         return Response.status(Response.Status.BAD_REQUEST).build();
-                    }
-                    if(carDemand.getType().getName() == null){
-                        carParkService.deleteUser(userCreatedCast.getId());
-                        return Response.status(Response.Status.BAD_REQUEST).build();
+
+                    Object carType;
+                    if(carDemand.getType().getId() == null && carDemand.getType().getName() != null){
+                        carType = carParkService.getCarType(carDemand.getType().getName());
+                        if (carType == null)
+                            return Response.status(Response.Status.BAD_REQUEST).build();
                     }
 
-                    Object carType = carParkService.getCarType(carDemand.getType().getName());
+                    else if(carDemand.getType().getName() == null)
+                        return Response.status(Response.Status.BAD_REQUEST).build();
+
+                    else
+                        carType = carParkService.getCarType(carDemand.getType().getId());
+
                     CAR_TYPE carTypeCasted;
                     Boolean typeCreated;
                     if (carType == null){
