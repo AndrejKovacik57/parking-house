@@ -854,6 +854,11 @@ public class CarParkService extends AbstractCarParkService{
     public Object endReservation(Long reservationId) {
         EntityManager em = emf.createEntityManager();
 
+        if(reservationId == null){
+            em.close();
+            return null;
+        }
+
         RESERVATION reservation = em.find(RESERVATION.class, reservationId);
 
         if(reservation == null){
