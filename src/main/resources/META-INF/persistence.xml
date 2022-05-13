@@ -20,7 +20,7 @@
             <property name="javax.persistence.jdbc.user" value="vsa"/>
             <property name="javax.persistence.jdbc.password" value="vsa"/>
 
-            <property name="javax.persistence.schema-generation.database.action" value="create"/>
+            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
             <property name="eclipselink.target-database" value="MySQL"/>
             <property name="eclipselink.logging.level.sql" value="FINE"/>
             <property name="eclipselink.logging.parameters" value="true"/>

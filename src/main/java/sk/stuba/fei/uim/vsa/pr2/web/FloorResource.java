@@ -157,8 +157,6 @@ public class FloorResource {
                     Object carType;
                     if(parkingSpot.getType().getId() == null && parkingSpot.getType().getName() != null){
                         carType = carParkService.getCarType(parkingSpot.getType().getName());
-                        if (carType == null)
-                            return Response.status(Response.Status.BAD_REQUEST).build();
                     }
 
                     else if(parkingSpot.getType().getName() == null)

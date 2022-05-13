@@ -181,8 +181,6 @@ public class ParkSpotResource {
             Object carType;
             if(parkingSpotDemand.getType().getId() == null && parkingSpotDemand.getType().getName() != null){
                 carType = carParkService.getCarType(parkingSpotDemand.getType().getName());
-                if (carType == null)
-                    return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
             else if(parkingSpotDemand.getType().getName() == null)

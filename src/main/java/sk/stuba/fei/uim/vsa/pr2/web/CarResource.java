@@ -173,8 +173,7 @@ public class CarResource {
             Object carType;
             if(carDemand.getType().getId() == null && carDemand.getType().getName() != null){
                 carType = carParkService.getCarType(carDemand.getType().getName());
-                if (carType == null)
-                    return Response.status(Response.Status.BAD_REQUEST).build();
+
             }
 
             else if(carDemand.getType().getName() == null)
