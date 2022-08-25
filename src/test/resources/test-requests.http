@@ -1,150 +1,163 @@
 ###
 GET http://localhost:8080/carparks
 Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 ###
 GET http://localhost:8080/carparks/4
 Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 ###
 POST http://localhost:8080/carparks
 Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 {
-    "name": "FULL CARPARK",
-    "address": "balbal 58",
-    "prices": 10,
+    "name": "Test2",
+    "address": "test 50",
+    "prices": 30,
     "floors" :
     [
-        {
-            "identifier": "F1",
-            "spots" :
-            [
-                {
-                "identifier": "S1",
-                "carParkFloor": "F1",
-                "type" :
-                    {
-                        "name": "elektrika"
-                    }
-                },
-                {
-                "identifier": "S2",
-                "type" :
-                    {
-                        "name": "plyn"
-                    },
-                "carParkFloor": "F1"
-                }
-            ]
-        }
     ]
-}
-###
-POST http://localhost:8080/skusam
-Accept: application/json
-
-{
-    "name": "FULL CARPARK10",
-    "address": "balbal 58",
-    "prices": 10,
-    "floors" :
-    [
-        {
-            "identifier": "F1"
-        }
-    ]
-
 }
 ###
 POST http://localhost:8080/carparks
 Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 {
-    "name": "FULL CARPARK10",
-    "address": "balbal 58",
-    "prices": 10,
-    "floors" :
-    [
-        {
-            "identifier": "F1"
-        }
-    ]
-
+    "name": "Test2",
+    "address": "test 50",
+    "prices": 30
 }
 ###
-
-PUT http://localhost:8080/carparks
+PUT http://localhost:8080/carparks/1051
 Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 {
-    "name": "FULL CARPARK UPDATED",
-    "address": "balbal 58 updated",
+    "name": "Test",
+    "address": "Test 58 updated",
     "prices": 99
 }
 ###
 DELETE http://localhost:8080/carparks/952
 Accept: application/json
-
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 ###
-GET http://localhost:8080/carparks/401/floors
+POST http://localhost:8080/users
 Accept: application/json
-###
-POST http://localhost:8080/carparks/4/floors
-Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 {
-    "identifier": "F1",
-    "spots" :
+    "firstName": "name",
+    "lastName": "surname",
+    "email": "aa@aa.com",
+    "cars":
     [
         {
-            "identifier": "S1",
-            "carParkFloor": "F1",
-            "type" :
-                {
-                    "name": "elektrika"
-                }
-         }
+            "brand": "skoda",
+            "model": "fabia",
+            "vrp": "znacka55",
+            "colour": "cervena",
+            "type":
+            {
+                "name": "voda"
+            },
+            "owner":
+            {
+                "id": 3,
+                "firstName": "user",
+                "lastName": "last",
+                "email": "my@email.com"
+            }
+
+        }
     ]
 }
 
 ###
-DELETE http://localhost:8080/carparks/4/floors/F1
+POST http://localhost:8080/users
 Accept: application/json
-
-###
-GET http://localhost:8080/carparks/1/spots
-Accept: application/json
-
-###
-GET http://localhost:8080/carparks/1/spots?free=false
-Accept: application/json
-
-###
-GET http://localhost:8080/carparks/401/floors/F1/spots
-Accept: application/json
-
-###
-GET http://localhost:8080/parkingspots/403
-Accept: application/json
-
-###
-POST http://localhost:8080/carparks/1/floors/Ff1/spots
-Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 {
-    "identifier": "S2",
-    "carParkFloor": "F1",
-    "type" :
-        {
-            "name": "future"
-        }
+  "firstName": "user3",
+  "lastName": "last3",
+  "email": "my3@email.com",
+  "cars":[
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA321",
+    "colour": "blue",
+    "type":
+            {
+                "name": "voda"
+            },
+    "owner": {
+      "id": 3,
+      "firstName": "user",
+      "lastName": "last",
+      "email": "my@email.com"
+      }
+    },
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA322",
+    "colour": "blue",
+    "type":
+            {
+                "name": "voda"
+            },
+    "owner": {
+      "id": 3,
+      "firstName": "user",
+      "lastName": "last",
+      "email": "my@email.com"
+      }
+    }
+  ]
 }
 
 ###
-GET http://localhost:8080/users
+POST http://localhost:8080/users
 Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "firstName": "user3",
+  "lastName": "last3",
+  "email": "my3@email.com"
+
+}
+###
+DELETE http://localhost:8080/users/1504
+Accept: application/json
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
 
 ###
-GET http://localhost:8080/users?email=d
-Accept: application/json
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brand",
+  "model": "model",
+  "vrp": "BA3216to1",
+  "colour": "blue",
+   "type":
+           {
+            "name": "plyn"
+           },
+  "owner": {
+    "firstName": "name",
+    "lastName": "last",
+    "email": "my35o1@email.com"
+    }
+}
+
+###
+DELETE	http://localhost:8080/users/1701
+Authorization: Basic YWRtaW5AdnNhLnNrOjEwMDE=

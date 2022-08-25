@@ -1,0 +1,2920 @@
+###Create user
+POST http://localhost:8080/users
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "firstName": "user0",
+  "lastName": "last0",
+  "email": "my0@email.com"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.global.set("deluserid", response.body.id);
+
+%}
+
+###GET created USERS W id
+GET http://localhost:8080/users/{{deluserid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("id is correct", function() {
+        client.assert(response.body.id == client.global.get("deluserid"), "id is not correct, provided:"+response.body.id+" instead "+client.global.get("deluserid"));
+    });
+
+%}
+
+###Create car w user
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brand",
+  "model": "model",
+  "vrp": "BA3216to1",
+  "colour": "blue",
+  "type" : { "name": "benzin" },
+  "owner": {
+    "firstName": "first",
+    "lastName": "last",
+    "email": "my35o1@email.com"
+    }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+
+###Create USER WITH CARs
+POST http://localhost:8080/users
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "firstName": "user3",
+  "lastName": "last3",
+  "email": "my3@email.com",
+  "cars":[
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA321",
+    "colour": "blue",
+    "type" : { "name": "benzin" },
+    "owner": {
+      "id": 3,
+      "firstName": "user3",
+      "lastName": "last3",
+      "email": "my3@email.com"
+      }
+    },
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA322",
+    "colour": "blue",
+    "type" : { "name": "benzin" },
+    "owner": {
+      "id": 3,
+      "firstName": "user3",
+      "lastName": "last3",
+      "email": "my3@email.com"
+      }
+    }
+  ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.global.set("userid", response.body.id);
+    client.global.set("usermail", response.body.email);
+    client.global.set("carid", response.body.cars[0].id);
+
+%}
+
+###Create USER WITH duplicate CARs
+POST http://localhost:8080/users
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "firstName": "user3",
+  "lastName": "last3",
+  "email": "my3a@email.com",
+  "cars":[
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA321a",
+    "colour": "blue",
+    "type" : { "name": "benzin" },
+    "owner": {
+      "id": 3,
+      "firstName": "user",
+      "lastName": "last",
+      "email": "my@email.com"
+      }
+    },
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA322",
+    "colour": "blue",
+    "type" : { "name": "benzin" },
+    "owner": {
+      "id": 3,
+      "firstName": "user",
+      "lastName": "last",
+      "email": "my@email.com"
+      }
+    }
+  ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+###Create USER WITH duplicate email
+POST http://localhost:8080/users
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "firstName": "user3",
+  "lastName": "last3",
+  "email": "my3@email.com",
+  "cars":[
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA321b",
+    "colour": "blue",
+    "type" : { "name": "benzin" },
+    "owner": {
+      "id": 3,
+      "firstName": "user",
+      "lastName": "last",
+      "email": "my@email.com"
+      }
+    },
+    {
+    "brand": "brand",
+    "model": "model",
+    "vrp": "BA322b",
+    "colour": "blue",
+     "type" : { "name": "benzin" },
+
+    "owner": {
+      "id": 3,
+      "firstName": "user",
+      "lastName": "last",
+      "email": "my@email.com"
+      }
+    }
+  ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+###Create car for 1
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brand",
+  "model": "model",
+  "vrp": "BA3216to111",
+  "colour": "blue",
+   "type" : { "name": "benzin" },
+  "owner": {
+    "id": 1,
+    "firstName": "admin",
+    "lastName": "last",
+    "email": "admin@vsa.sk"
+    }
+}
+
+
+###GET USERS
+GET http://localhost:8080/users
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("Response length is correct", function() {
+        client.assert(response.body.length === 4, "Response length is not 4 but " + response.body.length);
+    });
+%}
+
+###GET USERS W email 404
+GET http://localhost:8080/users?email={{usermail}}habla
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 200, "Response status is not 201");
+    });
+
+    client.test("Response length is correct", function() {
+        client.assert(response.status === 404 || response.body.length === 0, "Response length is not 0");
+    });
+%}
+
+###GET USERS W email
+GET http://localhost:8080/users?email={{usermail}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("Response length is correct", function() {
+        client.assert(response.body.length === 1, "Response length is not 1");
+    });
+
+    client.test("Email is correct", function() {
+        client.assert(response.body[0].email == client.global.get("usermail"), "email is not correct");
+    });
+%}
+
+###GET USERS W id
+GET http://localhost:8080/users/{{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("id is correct", function() {
+        client.assert(response.body.id == client.global.get("userid"), "id is not correct");
+    });
+%}
+
+###GET USERS W id 404
+GET http://localhost:8080/users/0
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###GET USERS W id bad id
+GET http://localhost:8080/users/abc
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###Create user empty cars
+POST http://localhost:8080/users
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "firstName": "user0ep",
+  "lastName": "last0ep",
+  "email": "my0ep@email.com",
+  "cars":[]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+###Create user duplicate
+POST http://localhost:8080/users
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "firstName": "user0ep",
+  "lastName": "last0ep",
+  "email": "my0ep@email.com",
+  "cars":[]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+%}
+
+###DELETE user
+DELETE http://localhost:8080/users/{{deluserid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+###DELETE user not exists
+DELETE http://localhost:8080/users/{{deluserid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###GET USERS W id 404
+GET http://localhost:8080/users/{{deluserid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###CAR CREATE
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brandc",
+  "model": "modelc",
+  "vrp": "BA3216to1c",
+  "colour": "blue",
+  "type" : { "name": "benzin" },
+  "owner": {
+      "id": {{userid}},
+      "firstName": "first",
+      "lastName": "last",
+      "email": "random@email.sk"
+
+  }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("vrp is correct", function() {
+        client.assert(response.body.vrp === "BA3216to1c", "vrp is not correct");
+    });
+
+    client.test("owner is correct", function() {
+        client.assert(response.body.owner.toString() === client.global.get("userid").toString(), "owner ("+response.body.owner+") is not correct owner("+client.global.get("userid")+")");
+    });
+
+    client.global.set("carid",response.body.id)
+    client.global.set("carvrp",response.body.vrp)
+    client.global.set("carowner",response.body.owner)
+
+%}
+
+###CAR CREATE w user
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brandc2",
+  "model": "modelc2",
+  "vrp": "BA3216to1c2",
+  "colour": "blue",
+  "type" : { "name": "benzin" },
+  "owner": {
+    "firstName": "firstc2",
+    "lastName": "last",
+    "email": "my35o1c2@email.com"
+    }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("vrp is correct", function() {
+        client.assert(response.body.vrp == "BA3216to1c2", "vrp is not correct");
+    });
+
+%}
+
+###CAR CREATE DUPLICATE VRP
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brandc",
+  "model": "modelc",
+  "vrp": "BA3216to1c",
+  "colour": "blue",
+   "type" : { "name": "benzin" },
+
+  "owner": {
+      "id": {{userid}},
+      "firstName": "first",
+      "lastName": "last",
+      "email": "random@email.sk"
+  }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+
+###CAR CREATE w empty user
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brandc3",
+  "model": "modelc3",
+  "vrp": "BA3216to1c3",
+  "colour": "blue",
+   "type" : { "name": "benzin" },
+  "owner": {}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+
+###GET ALL CARS
+GET http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.test("cars length is correct", function() {
+        client.assert(response.body.length === 6, "cars length is not correct");
+    });
+
+%}
+
+###GET CARS USER
+GET http://localhost:8080/cars?user={{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.test("cars length is correct", function() {
+        client.assert(response.body.length === 3, "cars length is not correct");
+    });
+
+%}
+
+###GET CARS USER not exists
+GET http://localhost:8080/cars?user=987456
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400 ||response.status === 404 || (response.status === 200 & response.body.length === 0), "Response status is not 40x or []");
+    });
+%}
+
+###GET CARS VRP
+GET http://localhost:8080/cars?vrp={{carvrp}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.test("cars length is correct", function() {
+        client.assert(response.body.length === 1, "cars length is not correct");
+    });
+    client.test("vrp is correct", function() {
+        client.assert(response.body[0].vrp == client.global.get("carvrp"), "vrp is not correct");
+    });
+%}
+
+
+###GET CARS VRP not exists
+GET http://localhost:8080/cars?vrp=hablabal321
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.body.length === 0, "Response status is not 404 || []");
+    });
+%}
+
+###GET CARS VRP and USER
+GET http://localhost:8080/cars?vrp={{carvrp}}&user={{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.test("cars length is correct", function() {
+        client.assert(response.body.length === 1, "cars length is not correct");
+    });
+    client.test("vrp is correct", function() {
+        client.assert(response.body[0].vrp === client.global.get("carvrp"), "vrp is not correct");
+    });
+    client.test("owner is correct", function() {
+        // client.assert(response.body[0].owner === client.global.get("userid"), "owner is not correct");
+        client.assert(response.body[0].owner.toString() === client.global.get("userid").toString(), "owner ("+response.body[0].owner+") is not correct owner("+client.global.get("userid")+")");
+    });
+
+%}
+###GET CARS VRP404 and USER
+GET http://localhost:8080/cars?vrp={{carvrp}}hablblas&user={{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.body.length === 0, "Response status is not 404 || []");
+    });
+%}
+
+
+###GET CARS VRP and USER404
+GET http://localhost:8080/cars?vrp={{carvrp}}&user={{userid}}321
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.body.length === 0, "Response status is not 404 || []");
+    });
+%}
+
+###GET CARS404 VRP and USER404
+GET http://localhost:8080/cars?vrp={{carvrp}}gdsfs654&user={{userid}}321
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.body.length === 0, "Response status is not 404 || []");
+    });
+%}
+
+
+###GET CAR ID
+GET http://localhost:8080/cars/{{carid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.test("car id is correct", function() {
+        client.assert(response.body.id == client.global.get("carid"), "car id is not correct");
+    });
+
+%}
+
+###GET CAR ID 404
+GET http://localhost:8080/cars/{{carid}}654
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+
+%}
+
+###DELETE CAR ID
+DELETE http://localhost:8080/cars/{{carid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+
+
+%}
+
+###DELETE CAR ID 404
+DELETE http://localhost:8080/cars/{{carid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###GET DELETED CAR ID
+GET http://localhost:8080/cars/{{carid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+### DELETED CAR CREATE AGAIN
+POST http://localhost:8080/cars
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "brand": "brandc",
+  "model": "modelc",
+  "vrp": "BA3216to1c",
+  "colour": "blue",
+    "type" : {
+  "name": "benzin"
+  },
+  "owner": {
+      "id": {{userid}},
+      "firstName": "first",
+      "lastName": "last",
+      "email": "random@email.sk"
+  }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("vrp is correct", function() {
+        client.assert(response.body.vrp === "BA3216to1c", "vrp is not correct");
+    });
+
+    client.test("owner is correct", function() {
+        // client.assert(response.body.owner === client.global.get("userid"), "owner is not correct");
+        client.assert(response.body.owner.toString() === client.global.get("userid").toString() , "owner ("+response.body.owner+") is not correct owner("+client.global.get("userid")+")");
+
+
+    });
+
+    client.global.set("carid",response.body.id)
+    client.global.set("carvrp",response.body.vrp)
+    client.global.set("carowner",response.body.owner)
+
+%}
+
+###GET DELETED a CREATED CAR ID
+GET http://localhost:8080/cars/{{carid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### CREATE CP with FLOORS & SPOTS
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" : [
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S1",
+             "type" : { "name": "benzin" },
+
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S2",
+             "type" : { "name": "benzin" },
+
+            "carParkFloor": "F1"
+            }
+        ]
+        }
+    ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.global.set("cpid", response.body.id);
+    client.global.set("spotid", response.body.floors[0].spots[0].id);
+    client.global.set("spot2id", response.body.floors[0].spots[1].id);
+%}
+
+### CREATE CP WITH FLOORS & SPOTS/EMPTY SPOTS/NONE SPOTS
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK00",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" : [
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S1",
+             "type" : { "name": "benzin" },
+
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S2",
+             "type" : { "name": "benzin" },
+
+            "carParkFloor": "F1"
+            }
+        ]
+        },
+        {
+        "identifier": "F2",
+        "spots" : []
+        },
+        {
+        "identifier": "F3"
+        }
+    ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("Floor length is 3", function() {
+        client.assert(response.body.floors.length === 3, "floor length is not 3");
+    });
+
+    client.global.set("delcpid", response.body.id);
+
+%}
+
+### CREATE CP WITH EMPTY FLOORS
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK001",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" : []
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+### CREATE CP WITHOUT FLOORS
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK002",
+    "address": "balbal 58",
+    "prices": 10
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+### CREATE CP WITH FLOOR with DUPLICATE SPOTS
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK2",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" : [
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S1",
+             "type" : { "name": "benzin" },
+
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S1",
+             "type" : { "name": "benzin" },
+            "carParkFloor": "F1"
+            }
+        ]
+        }
+    ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+### CREATE CP WITH FLOORS with SAME SPOT
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK3",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" : [
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S1d",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S2d",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            }
+        ]
+        },
+        {
+        "identifier": "F2",
+        "spots" : [
+            {
+            "identifier": "S3d",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S2d",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            }
+        ]
+        }
+    ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+### CREATE CP WITH DUPLICATE FLOOR ID
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK4",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" : [
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S1",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S2",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            }
+        ]
+        },
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S3",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S4",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            }
+        ]
+        }
+    ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+### CREATE DUPLICATE CP
+POST http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "name": "FULL CARPARK",
+    "address": "balbal 58",
+    "prices": 10,
+    "floors" : [
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S1",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S2",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            }
+        ]
+        },
+        {
+        "identifier": "F1",
+        "spots" : [
+            {
+            "identifier": "S3",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            },
+            {
+            "identifier": "S4",
+                  "type" : {
+  "name": "benzin"
+  },
+            "carParkFloor": "F1"
+            }
+        ]
+        }
+    ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+###GET ALL CARPARKS
+GET http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is 4", function() {
+        client.assert(response.body.length === 4, "length is not 4");
+    });
+
+
+%}
+
+###GET CARPARKs name
+GET http://localhost:8080/carparks?name=FULL CARPARK
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is 1", function() {
+        client.assert(response.body.length === 1, "length is not 1");
+    });
+
+
+%}
+
+
+###GET CARPARKs 404
+GET http://localhost:8080/carparks?name=hablasdjjsf321
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert((response.status === 200 && response.body.length === 0) || response.status === 404, "Response status is not 200 [] or 404");
+    });
+%}
+
+
+###GET CARPARK ID
+GET http://localhost:8080/carparks/{{cpid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("correct id", function() {
+        client.assert(response.body.id == client.global.get("cpid"), "id is not correct");
+    });
+
+    client.test("correct floor count - 1", function() {
+        client.assert(response.body.floors.length === 1, "floor count is not correct");
+    });
+
+    client.test("correct floor 0 spot count - 2", function() {
+        client.assert(response.body.floors[0].spots.length === 2, "floor 0 spot count is not correct");
+    });
+
+%}
+
+###GET CARPARK id 404
+GET http://localhost:8080/carparks/32145698
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###GET CARPARK before delete
+GET http://localhost:8080/carparks/{{delcpid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###DELETE CARPARK
+DELETE http://localhost:8080/carparks/{{delcpid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+###DELETE CARPARK 404
+DELETE http://localhost:8080/carparks/{{delcpid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###GET ALL CARPARKS after delete
+GET http://localhost:8080/carparks
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is 4", function() {
+        client.assert(response.body.length === 3, "length is not 3");
+    });
+
+
+%}
+
+
+###GET CARPARK after delete
+GET http://localhost:8080/carparks/{{delcpid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+
+
+
+###GET ALL FLOORS FROM CARPARK
+GET http://localhost:8080/carparks/{{cpid}}/floors
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("floor length is 1", function() {
+        client.assert(response.body.length === 1, "Response status is not 1");
+    });
+
+%}
+
+###CREATE NEW FLOOR
+POST http://localhost:8080/carparks/{{cpid}}/floors
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "F-NEW0"
+}
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("identifier is correct", function() {
+        client.assert(response.body.identifier == "F-NEW0", "identifier is not correct");
+    });
+    client.test("car park is correct", function() {
+        client.assert(response.body.carPark == client.global.get("cpid"), "car park is not correct");
+    });
+
+
+%}
+
+###CREATE DUPLICATE FLOOR
+POST http://localhost:8080/carparks/{{cpid}}/floors
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "F-NEW0"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+
+###GET CREATED FLOOR
+GET http://localhost:8080/carparks/{{cpid}}/floors/F-NEW0
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("identifier is correct", function() {
+        client.assert(response.body.identifier == "F-NEW0", "identifier is not correct");
+    });
+    client.test("car park is correct", function() {
+        client.assert(response.body.carPark == client.global.get("cpid"), "car park is not correct");
+    });
+
+
+%}
+
+###GET ALL FLOORS FROM CARPARK AFTER INSERT
+GET http://localhost:8080/carparks/{{cpid}}/floors
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("floor length is 2", function() {
+        client.assert(response.body.length === 2, "Response status is not 2");
+    });
+
+%}
+
+
+###DELETE FLOOR
+DELETE http://localhost:8080/carparks/{{cpid}}/floors/F-NEW0
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+
+%}
+
+###DELETE FLOOR 404
+DELETE http://localhost:8080/carparks/{{cpid}}/floors/F-NEW0
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+
+%}
+
+###GET ALL FLOORS FROM CARPARK AFTER DELETE
+GET http://localhost:8080/carparks/{{cpid}}/floors
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("floor length is 1", function() {
+        client.assert(response.body.length === 1, "Response status is not 1");
+    });
+
+%}
+
+###GET CREATED FLOOR AFTER DELETE
+GET http://localhost:8080/carparks/{{cpid}}/floors/F-NEW0
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+
+###CREATE FLOOR AGAIN
+POST http://localhost:8080/carparks/{{cpid}}/floors
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "F-NEW0"
+}
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("identifier is correct", function() {
+        client.assert(response.body.identifier == "F-NEW0", "identifier is not correct");
+    });
+    client.test("car park is correct", function() {
+        client.assert(response.body.carPark == client.global.get("cpid"), "car park is not correct");
+    });
+
+    client.global.set("floorid", response.body.identifier);
+
+%}
+
+###GET ALL FLOORS FROM CARPARK404
+GET http://localhost:8080/carparks/{{cpid}}32145/floors
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 200");
+    });
+%}
+
+###GET CREATED FLOOR from CARPARK404
+GET http://localhost:8080/carparks/{{cpid}}32145/floors/F-NEW0
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 200");
+    });
+%}
+
+###GET FLOOR404 from CARPARK404
+GET http://localhost:8080/carparks/{{cpid}}32145/floors/F-NEW0hablbabla
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 200");
+    });
+%}
+
+
+
+
+
+###GET SPOTS
+GET http://localhost:8080/carparks/{{cpid}}/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 2", function() {
+        client.assert(response.body.length === 2, "Response status is not 2");
+    });
+
+    client.test("spot carpark is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+        })
+    });
+%}
+
+###GET SPOTS - FREE
+GET http://localhost:8080/carparks/{{cpid}}/spots?free=true
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 2", function() {
+        client.assert(response.body.length === 2, "Response status is not 2");
+    });
+
+    client.test("spot carpark and status is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+            client.assert(spot.free === true, "Spot status is not free");
+        })
+    });
+%}
+
+###GET SPOTS NOT FREE
+GET http://localhost:8080/carparks/{{cpid}}/spots?free=false
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 0", function() {
+        client.assert(response.body.length === 0, "Response status is not 0");
+    });
+
+    client.test("spot carpark and status is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+            client.assert(spot.free === false, "Spot status is not false");
+        })
+    });
+%}
+
+
+###GET 404 SPOTS
+GET http://localhost:8080/carparks/{{cpid}}32145/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###GET 404 SPOTS free
+GET http://localhost:8080/carparks/{{cpid}}32145/spots?free=true
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###GET 404 SPOTS not free
+GET http://localhost:8080/carparks/{{cpid}}32145/spots?free=false
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+
+###GET SPOTS FROM FLOOR
+GET http://localhost:8080/carparks/{{cpid}}/floors/F1/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 2", function() {
+        client.assert(response.body.length === 2, "Response status is not 2");
+    });
+
+    client.test("spot carpark and floor is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+            client.assert(spot.carParkFloor == "F1", "Spot floor is not correct");
+        })
+    });
+%}
+
+###GET SPOTS FROM FLOOR EMPTY
+GET http://localhost:8080/carparks/{{cpid}}/floors/{{floorid}}/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 0", function() {
+        client.assert(response.body.length === 0, "Response status is not 0");
+    });
+%}
+
+###GET SPOTS FROM FLOOR404
+GET http://localhost:8080/carparks/{{cpid}}/floors/{{floorid}}hablbabl/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###GET SPOTS FROM carpark404 FLOOR
+GET http://localhost:8080/carparks/{{cpid}}32145/floors/{{floorid}}/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+
+###GET SPOTS FROM carpark404 FLOOR404
+GET http://localhost:8080/carparks/{{cpid}}32145/floors/{{floorid}}hablbal/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+%}
+
+###POST SPOT TO FLOOR
+POST http://localhost:8080/carparks/{{cpid}}/floors/F1/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "SP01",
+  "carParkFloor": "F1",
+  "carPark": {{cpid}},
+  "type": {
+      "name": "lpg"
+  }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot carpark correct", function() {
+        client.assert(response.body.carPark == client.global.get("cpid"), "cp is not correct");
+    });
+
+    client.test("spot identifier correct", function() {
+        client.assert(response.body.identifier == "SP01", "identifier is not correct");
+    });
+
+    client.global.set("spotid",response.body.id);
+
+%}
+
+###POST SPOT TO FLOOR DUPLICATE
+POST http://localhost:8080/carparks/{{cpid}}/floors/F1/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "SP01",
+  "carParkFloor": "F1",
+       "type" : {
+  "name": "benzin"
+  },
+  "carPark": {{cpid}}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+###POST SPOT DUPLICATE ANOTHER FLOOR
+POST http://localhost:8080/carparks/{{cpid}}/floors/{{floorid}}/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "SP01",
+  "carParkFloor": "{{floorid}}",
+       "type" : {
+  "name": "benzin"
+  },
+  "carPark": {{cpid}}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+
+###POST SPOT TO FLOOR404
+POST http://localhost:8080/carparks/{{cpid}}/floors/F132145hb/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "SP02",
+  "carParkFloor": "F1",
+        "type" : {
+  "name": "benzin"
+  },
+  "carPark": {{cpid}}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400 || response.status === 404, "Response status is not 40x");
+    });
+
+%}
+
+
+###POST SPOT TO FLOOR carpark404
+POST http://localhost:8080/carparks/{{cpid}}32145/floors/F1/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "SP03",
+  "carParkFloor": "F1",
+        "type" : {
+  "name": "benzin"
+  },
+  "carPark": {{cpid}}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400 || response.status === 404, "Response status is not 40x");
+    });
+
+%}
+
+###POST SPOT TO FLOOR404 carpark404
+POST http://localhost:8080/carparks/{{cpid}}32145/floors/F132145bg/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "SP04",
+  "carParkFloor": "F1",
+  "type" : { "name": "benzin" },
+  "carPark": {{cpid}}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400 || response.status === 404, "Response status is not 40x");
+    });
+
+%}
+
+
+###GET SPOTS CARPARK
+GET http://localhost:8080/carparks/{{cpid}}/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 3", function() {
+        client.assert(response.body.length === 3, "Response status is not 3");
+    });
+
+    client.test("spot carpark is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is "+spot.carPark+" but required is "+client.global.get("cpid"));
+        })
+    });
+%}
+
+
+###GET SPOTS FROM FLOOR
+GET http://localhost:8080/carparks/{{cpid}}/floors/F1/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 3", function() {
+        client.assert(response.body.length === 3, "Response status is not 3");
+    });
+
+    client.test("spot carpark and floor is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+            client.assert(spot.carParkFloor == "F1", "Spot floor is not correct");
+        })
+    });
+%}
+
+###GET SPOT - ID
+GET http://localhost:8080/parkingspots/{{spotid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot carpark correct", function() {
+        client.assert(response.body.carPark == client.global.get("cpid"), "cp is not correct");
+    });
+
+    client.test("spot id correct", function() {
+        client.assert(response.body.id == client.global.get("spotid"), "id is not correct");
+    });
+
+    client.test("spot identifier correct", function() {
+        client.assert(response.body.identifier == "SP01", "identifier is not correct");
+    });
+
+%}
+
+###GET SPOT - ID404
+GET http://localhost:8080/parkingspots/{{spotid}}321456
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+
+%}
+
+###DEL SPOT
+DELETE http://localhost:8080/parkingspots/{{spotid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+
+%}
+
+###GET SPOT - ID404
+GET http://localhost:8080/parkingspots/{{spotid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+
+%}
+
+
+###GET SPOTS CARPARK aafter del
+GET http://localhost:8080/carparks/{{cpid}}/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 2", function() {
+        client.assert(response.body.length === 2, "Response status is not 2");
+    });
+
+    client.test("spot carpark is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+        })
+    });
+%}
+
+
+###GET SPOTS FROM FLOOR after del
+GET http://localhost:8080/carparks/{{cpid}}/floors/F1/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 2", function() {
+        client.assert(response.body.length === 2, "Response status is not 2");
+    });
+
+    client.test("spot carpark and floor is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+            client.assert(spot.carParkFloor == "F1", "Spot floor is not correct");
+        })
+    });
+%}
+
+
+
+###POST SPOT TO FLOOR again
+POST http://localhost:8080/carparks/{{cpid}}/floors/F1/spots
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+  "identifier": "SP01",
+  "carParkFloor": "F1",
+  "type" : { "name": "benzin" },
+  "carPark": {{cpid}}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot carpark correct", function() {
+        client.assert(response.body.carPark == client.global.get("cpid"), "cp is not correct");
+    });
+
+    client.test("spot identifier correct", function() {
+        client.assert(response.body.identifier == "SP01", "identifier is not correct");
+    });
+
+    client.global.set("spotid",response.body.id);
+
+%}
+
+
+### rezervacia car404
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {
+        "id": {{carid}}32145,
+        "brand": "br",
+        "model": "mo",
+         "vrp": "vrp",
+         "colour": "clr",
+        "type" : { "name": "benzin" }
+        },
+    "spot": {
+        "id": {{spotid}},
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+        "type" : { "name": "benzin" }
+        }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+
+%}
+
+### rezervacia spot404
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {
+        "id": {{carid}}
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+        "type" : { "name": "benzin" }
+    },
+    "spot": {"id": {{spotid}}32145,
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+        "type" : { "name": "benzin" }
+}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+
+%}
+
+### rezervacia car-spot404
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {
+        "id": {{carid}}32145,
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+        "type" : { "name": "benzin" }
+        },
+    "spot": {"id": {{spotid}}32145,
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+        "type" : { "name": "benzin" }
+    }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 40x");
+    });
+
+%}
+
+
+### rezervacia s kuponom
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {"id": {{carid}},
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+        "type": {"id":33}
+    },
+    "spot": {"id": {{spotid}},
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+        "type": {"id":33}
+}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201, je "+response.status);
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.global.set("resid", response.body.id);
+    var date = (new Date);
+    client.global.set("date", date.toISOString().split('T').toString())
+%}
+
+### get resertvation id
+GET http://localhost:8080/reservations/{{resid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("id is correct", function() {
+        client.assert(response.body.id == client.global.get("resid"), "id is incorrect");
+    });
+%}
+
+### get resertvation id404
+GET http://localhost:8080/reservations/{{resid}}32145
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+
+### rezervacia duplicate
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {"id": {{carid}},
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+        "type" : { "name": "benzin" }
+    },
+    "spot": {"id": {{spotid}},
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+        "type" : { "name": "benzin" }
+    }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+### rezervacia another spot
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {"id": {{carid}},
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+        "type" : { "name": "benzin" }
+    },
+    "spot": {"id": {{spot2id}},
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+        "type" : { "name": "benzin" }
+    }
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+
+
+### get all reservations
+GET http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 1, "length is incorrect");
+    });
+%}
+
+### get all reservations from user
+GET http://localhost:8080/reservations?user={{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 1, "length is incorrect");
+    });
+%}
+
+### get all reservations from user404
+GET http://localhost:8080/reservations?user={{userid}}32145
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert((response.status === 200 && response.body.length === 0) || response.status === 404, "Response status is not correct");
+    });
+%}
+
+
+### get all reservations from date and spot
+GET http://localhost:8080/reservations?date={{date}}&spot={{spotid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+// najdemsa
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200 ");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 1, "length is incorrect");
+    });
+%}
+
+### get all reservations from another date and spot
+GET http://localhost:8080/reservations?date=2009-01-01&spot={{spotid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 0, "length is incorrect");
+    });
+%}
+
+
+### get all reservations from date and another spot
+GET http://localhost:8080/reservations?date={{date}}&spot={{spot2id}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 0, "length is incorrect");
+    });
+%}
+
+### get all reservations from another date and another spot
+GET http://localhost:8080/reservations?date=2009-01-01&spot={{spot2id}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 0, "length is incorrect");
+    });
+%}
+
+### get all reservations from date and spot and user
+GET http://localhost:8080/reservations?date={{date}}&spot={{spotid}}&user={{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 1, "length is incorrect");
+    });
+%}
+
+### get all reservations from date and spot and wrong user
+GET http://localhost:8080/reservations?date={{date}}&spot={{spotid}}&user={{userid}}32145
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert((response.status === 200 && response.body.length === 0) ||response.status === 404, "Response status is not 200");
+    });
+%}
+
+
+
+### get all reservations from notdate and spot
+GET http://localhost:8080/reservations?spot={{spotid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400|| response.status === 404, "Response status is not 400");
+    });
+
+%}
+
+### get all reservations from date and notspot
+GET http://localhost:8080/reservations?date={{date}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+
+
+
+
+
+###GET SPOTS - FREE
+GET http://localhost:8080/carparks/{{cpid}}/spots?free=true
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 2", function() {
+        client.assert(response.body.length === 2, "Response length is not 2");
+    });
+
+    client.test("spot carpark and status is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+            client.assert(spot.free === true, "Spot status is not free");
+        })
+    });
+%}
+
+###GET SPOTS NOT FREE
+GET http://localhost:8080/carparks/{{cpid}}/spots?free=false
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("spot length is 1", function() {
+        client.assert(response.body.length === 1, "Response status is not 1");
+    });
+
+    client.test("spot carpark and status is correct", function() {
+        response.body.forEach(spot=>{
+            client.assert(spot.carPark == client.global.get("cpid"), "Spot carpark is not correct");
+            client.assert(spot.free === false, "Spot status is not false");
+        })
+    });
+%}
+
+###end reservation wrong auth
+POST http://localhost:8080/reservations/{{resid}}/end
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 401, "Response status is not 401");
+    });
+%}
+
+
+###end reservation w coupon w user auth
+POST http://localhost:8080/reservations/{{resid}}/end
+Authorization: Basic bXkzQGVtYWlsLmNvbToxMDE=
+
+{}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+
+%}
+
+###end resertvation wrong input
+POST http://localhost:8080/reservations/abcd/end
+Authorization: Basic bXkzQGVtYWlsLmNvbTo2
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400 || response.status === 404, "Response status is not 400/404");
+    });
+%}
+
+###end reservation wrong auth
+POST http://localhost:8080/reservations/9/end
+Authorization: blablabla=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 401, "Response status is not 401");
+    });
+%}
+
+
+
+
+### rezervacia---------------------------------------------------------
+POST http://localhost:8080/reservations
+Authorization: Basic bXkzQGVtYWlsLmNvbTo2
+
+{
+    "car": {"id": {{carid}},
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+              "type" : {
+  "name": "benzin"
+  }
+},
+    "spot": {"id": {{spotid}},
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+              "type" : {
+  "name": "benzin"
+  }
+}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.global.set("resid", response.body.id);
+%}
+
+###end reservation w user auth
+POST http://localhost:8080/reservations/{{resid}}/end
+Authorization: Basic bXkzQGVtYWlsLmNvbTo2
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+
+%}
+
+### rezervacia
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {"id": {{carid}},
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+              "type" : {
+  "name": "benzin"
+  }
+},
+    "spot": {"id": {{spotid}},
+        "identifier": "iden",
+        "carParkFloor": "cpf",
+              "type" : {
+  "name": "benzin"
+  }
+}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.global.set("resid", response.body.id);
+%}
+
+###end reservation w user auth
+POST http://localhost:8080/reservations/{{resid}}/end
+Authorization: Basic bXkzQGVtYWlsLmNvbTo2
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+
+%}
+
+
+### rezervacia
+POST http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+    "car": {"id": {{carid}},
+        "brand": "br",
+        "model": "mo",
+        "vrp": "vrp",
+        "colour": "clr",
+              "type" : {
+  "name": "benzin"
+  }
+},
+    "spot": {"id": {{spot2id}},
+            "identifier": "iden",
+        "carParkFloor": "cpf",
+              "type" : {
+  "name": "benzin"
+  }
+}
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.global.set("resid", response.body.id);
+%}
+
+###end reservation w user auth
+POST http://localhost:8080/reservations/{{resid}}/end
+Authorization: Basic bXkzQGVtYWlsLmNvbTo2
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+
+%}
+
+
+
+### get all reservations
+GET http://localhost:8080/reservations
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 4, "length is incorrect");
+    });
+%}
+
+### get all reservations from user
+GET http://localhost:8080/reservations?user={{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 4, "length is incorrect");
+    });
+%}
+
+
+### get all reservations from date and spot and user
+GET http://localhost:8080/reservations?date={{date}}&spot={{spotid}}&user={{userid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 3, "length is incorrect");
+    });
+%}
+
+### get all reservations from date and spot2
+GET http://localhost:8080/reservations?date={{date}}&spot={{spot2id}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 1, "length is incorrect");
+    });
+%}
+
+### create carType
+POST http://localhost:8080/cartypes
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+   "name": "petrolej"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.global.set("ctid", response.body.id);
+
+%}
+
+### create carType duplicate
+POST http://localhost:8080/cartypes
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+   "name": "petrolej"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+### get carType
+GET http://localhost:8080/cartypes/{{ctid}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+### get carType bad id
+GET http://localhost:8080/cartypes/{{ctid}}54154415
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404 || response.status === 400, "Response status is not 404 or 400");
+    });
+
+%}
+
+### get carTypes
+GET http://localhost:8080/cartypes
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 404 or 400");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 3, "length is incorrect");
+    });
+%}
+
+### get carTypes name
+GET http://localhost:8080/cartypes?name=petrolej
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+%}
+
+### get carTypes name not found
+GET http://localhost:8080/cartypes?name=odchod
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+### create carType
+POST http://localhost:8080/cartypes
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+{
+   "name": "electric"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.global.set("ctid2", response.body.id);
+
+%}
+
+### get carTypes
+GET http://localhost:8080/cartypes
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 404 or 400");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+    client.test("length is correct", function() {
+        client.assert(response.body.length === 4, "length is incorrect");
+    });
+%}
+
+### delete carType
+DELETE http://localhost:8080/cartypes/{{ctid2}}
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 200");
+    });
+
+%}
+
+### delete carType bad request
+DELETE http://localhost:8080/cartypes/554541
+Authorization: Basic YWRtaW5AdnNhLnNrOjE=
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 404||response.status === 400, "Response status is not 404");
+    });
+
+%}
+
+### get carTypes wrong auth
+GET http://localhost:8080/cartypes
+Authorization: Basic YWRtaW5AdnNhLnNrOjEfregergerg
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 401, "Response status is not 401");
+    });
+
+
+%}
+

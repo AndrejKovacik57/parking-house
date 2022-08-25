@@ -54,7 +54,11 @@ public class Project2 {
         Object user = carParkService.getUser("admin@vsa.sk");
         if (user == null){
             carParkService.createUser("vsa","vsa","admin@vsa.sk");
+            System.out.println("Admin created");
+        }else{
+            System.out.println("Admin found");
         }
+
 
         // TODO sem napíš akékoľvek nastavenia, či volania, ktoré sa majú udiať ihneď po štarte
     }
